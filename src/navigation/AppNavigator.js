@@ -14,7 +14,13 @@ import ChatScreen from '../screens/ChatScreen';
 import ReminderScreen from '../screens/ReminderScreen';
 import AnalyticsScreen from '../screens/AnalyticsScreen';
 
+import CreateRoadmapScreen from '../screens/CreateRoadmapScreen';
+import PreviewRoadmapScreen from '../screens/PreviewRoadmapScreen';
+import MyRoadmapsScreen from '../screens/MyRoadmapsScreen';
+import RoadmapDetailScreen from '../screens/RoadmapDetailScreen';
+
 const Stack = createNativeStackNavigator();
+const AppStack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const tabConfig = {
@@ -78,6 +84,18 @@ function AuthStack() {
   );
 }
 
+function AuthenticatedStack() {
+  return (
+    <AppStack.Navigator screenOptions={{ headerShown: false }}>
+      <AppStack.Screen name="MainTabs" component={MainTabs} />
+      <AppStack.Screen name="CreateRoadmap" component={CreateRoadmapScreen} />
+      <AppStack.Screen name="PreviewRoadmap" component={PreviewRoadmapScreen} />
+      <AppStack.Screen name="MyRoadmaps" component={MyRoadmapsScreen} />
+      <AppStack.Screen name="RoadmapDetail" component={RoadmapDetailScreen} />
+    </AppStack.Navigator>
+  );
+}
+
 export default function AppNavigator() {
   const { user, loading } = useAuth();
 
@@ -91,7 +109,7 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer>
-      {user ? <MainTabs /> : <AuthStack />}
+      {user ? <AuthenticatedStack /> : <AuthStack />}
     </NavigationContainer>
   );
 }

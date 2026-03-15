@@ -6,7 +6,10 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "server": "npm --prefix server start",
+    "server:dev": "npm --prefix server run dev",
+    "dev": "concurrently -c \"cyan,magenta\" -n \"APP,SERVER\" \"npm start\" \"npm run server:dev\""
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.1.0",
@@ -29,5 +32,8 @@
     "react-native-screens": "~4.10.0",
     "react-native-svg": "~15.11.0"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }

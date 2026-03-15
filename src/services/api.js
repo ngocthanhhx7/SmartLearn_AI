@@ -1,8 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://192.168.1.11:5000/api';
-
+const API_URL = 'http://192.168.2.18:5000/api'; // Host IP for physical device
 const api = axios.create({
   baseURL: API_URL,
   timeout: 60000,
@@ -31,8 +30,11 @@ export const analyzePerformance = (studyData, quizData) =>
 
 // Study
 export const createStudySession = (data) => api.post('/study/session', data);
-export const saveQuizResult = (data) => api.post('/study/quiz-result', data);
-export const getProgress = () => api.get('/study/progress');
+// Roadmaps
+export const generateRoadmap = (topic) => api.post('/ai/generate-roadmap', { topic });
+export const saveRoadmap = (data) => api.post('/roadmap/save', data);
+export const getUserRoadmaps = () => api.get('/roadmap/user');
+export const getRoadmapById = (id) => api.get(`/roadmap/${id}`);
 
 // Analytics
 export const getAnalytics = () => api.get('/analytics');

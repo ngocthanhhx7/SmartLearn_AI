@@ -6,7 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { generateLearningPlan, createStudySession } from '../services/api';
 
-export default function LearningScreen() {
+export default function LearningScreen({ navigation }) {
   const [topic, setTopic] = useState('');
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState(null);
@@ -32,6 +32,30 @@ export default function LearningScreen() {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>📚 Trợ lý học tập AI</Text>
           <Text style={styles.headerSub}>Nhập chủ đề bất kỳ và AI sẽ tạo lộ trình học tập riêng cho bạn</Text>
+        </View>
+
+        <View style={styles.roadmapActions}>
+          <TouchableOpacity 
+            style={styles.actionBtn} 
+            onPress={() => navigation.navigate('CreateRoadmap')}
+            activeOpacity={0.8}
+          >
+            <LinearGradient colors={['#FF6B6B', '#EE5253']} style={styles.actionGradient}>
+              <Text style={styles.actionIcon}>✨</Text>
+              <Text style={styles.actionText}>Tạo lộ trình AI nâng cao</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.actionBtn} 
+            onPress={() => navigation.navigate('MyRoadmaps')}
+            activeOpacity={0.8}
+          >
+            <LinearGradient colors={['#10AC84', '#1DD1A1']} style={styles.actionGradient}>
+              <Text style={styles.actionIcon}>📂</Text>
+              <Text style={styles.actionText}>Lộ trình của tôi</Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.inputRow}>
@@ -128,6 +152,11 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
   headerTitle: { fontSize: 26, fontWeight: '800', color: '#FFF' },
   headerSub: { fontSize: 13, color: '#8E8EAA', marginTop: 6, lineHeight: 20 },
+  roadmapActions: { paddingHorizontal: 20, marginBottom: 25, gap: 12 },
+  actionBtn: { borderRadius: 14, overflow: 'hidden' },
+  actionGradient: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 14 },
+  actionIcon: { fontSize: 20, marginRight: 12 },
+  actionText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
   inputRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginBottom: 20 },
   input: {
     flex: 1, backgroundColor: '#1A1A2E', borderRadius: 14, paddingHorizontal: 16,
