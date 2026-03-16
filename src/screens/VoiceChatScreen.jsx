@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://smartlearn-backend-qxm7.onrender.com/api';
 const WS_BASE = API_URL.replace(/^https?/, 'wss').replace(/\/api$/, '');
+const IDLE_AI_TEXT = 'Nhấn nút micro để bắt đầu trò chuyện';
 
 const RECORDING_OPTIONS = {
   android: {
@@ -79,7 +80,7 @@ export default function VoiceChatScreen({ navigation }) {
   const { theme, isDark } = useTheme();
   const [status, setStatus] = useState('idle');
   const [transcript, setTranscript] = useState('');
-  const [aiText, setAiText] = useState('Nhấn nút micro để bắt đầu trò chuyện');
+  const [aiText, setAiText] = useState(IDLE_AI_TEXT);
   const [isConnected, setIsConnected] = useState(false);
 
   const wsRef = useRef(null);
@@ -149,6 +150,14 @@ export default function VoiceChatScreen({ navigation }) {
               setAiText('Gia sư AI sẵn sàng! Nhấn nút micro để nói.');
               break;
 
+            case 'status':
+              if (msg.status === 'reconnecting') {
+                setIsConnected(false);
+                setStatus('connecting');
+                setAiText(msg.message || 'Đang kết nối lại với Gia sư AI...');
+              }
+              break;
+
             case 'audio':
               if (msg.data) {
                 audioQueueRef.current.push({ data: msg.data, mimeType: msg.mimeType });
@@ -162,20 +171,32 @@ export default function VoiceChatScreen({ navigation }) {
             case 'text':
               setAiText((prev) => {
                 // If it's the initial placeholder, clear it
-                if (prev === 'Đang nghe...' || prev === 'Đang xử lý...' || prev === 'Gia sư AI sẵn sàng! Nhấn nút micro để nói.' || prev === 'Nhấn nút micro để bắt đầu trò chuyện') {
+                if (prev === 'Đang nghe...' || prev === 'Đang xử lý...' || prev === 'Gia sư AI sẵn sàng! Nhấn nút micro để nói.' || prev === IDLE_AI_TEXT) {
                   return msg.data;
                 }
                 return prev + msg.data;
               });
               break;
 
+            case 'transcript':
+              if (msg.source === 'user') {
+                setTranscript(msg.data || '');
+              }
+              if (msg.source === 'assistant' && msg.data) {
+                setAiText(msg.data);
+              }
+              break;
+
             case 'turnComplete':
-              setStatus('idle');
+              setStatus((prev) => (prev === 'aiSpeaking' ? prev : 'idle'));
               break;
 
             case 'error':
               setAiText(`Lỗi: ${msg.message}`);
               setStatus('idle');
+              if (msg.code === 'SESSION_ENDED' || msg.code === 'GEMINI_WS_ERROR') {
+                setIsConnected(false);
+              }
               break;
           }
         } catch (err) {
@@ -192,6 +213,7 @@ export default function VoiceChatScreen({ navigation }) {
       ws.onclose = () => {
         setIsConnected(false);
         setStatus('idle');
+        wsRef.current = null;
       };
 
       wsRef.current = ws;
@@ -218,7 +240,8 @@ export default function VoiceChatScreen({ navigation }) {
     isPlayingRef.current = false;
     setIsConnected(false);
     setStatus('idle');
-    setAiText('Nhấn nút micro để bắt đầu trò chuyện');
+    setAiText(IDLE_AI_TEXT);
+    setTranscript('');
   }, []);
 
   const playAudioQueue = async () => {
@@ -341,13 +364,15 @@ export default function VoiceChatScreen({ navigation }) {
       if (uri && wsRef.current?.readyState === WebSocket.OPEN) {
         const response = await fetch(uri);
         const blob = await response.blob();
+        const mimeType = blob.type || (Platform.OS === 'ios' ? 'audio/wav' : 'audio/x-wav');
 
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64 = reader.result.split(',')[1];
           wsRef.current.send(JSON.stringify({
             type: 'audio',
-            data: base64
+            data: base64,
+            mimeType,
           }));
         };
         reader.readAsDataURL(blob);
