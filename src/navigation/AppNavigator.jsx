@@ -22,6 +22,7 @@ import CreateRoadmapScreen from '../screens/CreateRoadmapScreen';
 import PreviewRoadmapScreen from '../screens/PreviewRoadmapScreen';
 import MyRoadmapsScreen from '../screens/MyRoadmapsScreen';
 import RoadmapDetailScreen from '../screens/RoadmapDetailScreen';
+import VoiceChatScreen from '../screens/VoiceChatScreen';
 
 const Stack = createNativeStackNavigator();
 const AppStack = createNativeStackNavigator();
@@ -100,6 +101,7 @@ function AuthenticatedStack() {
       <AppStack.Screen name="PreviewRoadmap" component={PreviewRoadmapScreen} />
       <AppStack.Screen name="MyRoadmaps" component={MyRoadmapsScreen} />
       <AppStack.Screen name="RoadmapDetail" component={RoadmapDetailScreen} />
+      <AppStack.Screen name="VoiceChat" component={VoiceChatScreen} />
     </AppStack.Navigator>
   );
 }

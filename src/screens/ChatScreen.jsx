@@ -9,7 +9,7 @@ import { chatWithAI, chatWithImage } from '../services/api';
 import MessageFormatter from '../components/MessageFormatter';
 import { useTheme } from '../context/ThemeContext';
 
-export default function ChatScreen() {
+export default function ChatScreen({ navigation }) {
   const { theme } = useTheme();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
@@ -205,6 +205,13 @@ export default function ChatScreen() {
           >
             <Text style={styles.sendIcon}>📤</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('VoiceChat')}
+            style={[styles.voiceBtn, { backgroundColor: theme.accent }]}
+            disabled={loading}
+          >
+            <Text style={styles.sendIcon}>🎙️</Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </View>
@@ -286,4 +293,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center', marginLeft: 8,
   },
   sendIcon: { fontSize: 18 },
+  voiceBtn: {
+    width: 44, height: 44, borderRadius: 22,
+    justifyContent: 'center', alignItems: 'center', marginLeft: 6,
+  },
 });
