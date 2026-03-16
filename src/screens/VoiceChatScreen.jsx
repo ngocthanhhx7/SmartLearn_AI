@@ -31,6 +31,50 @@ const RECORDING_OPTIONS = {
   web: {},
 };
 
+// Helper: Create WAV Header for PCM 16-bit 24kHz Mono
+function createWavHeader(pcmDataLength, sampleRate = 24000) {
+  const header = new ArrayBuffer(44);
+  const view = new DataView(header);
+
+  /* RIFF identifier */
+  view.setUint32(0, 0x52494646, false); // "RIFF"
+  /* file length */
+  view.setUint32(4, 36 + pcmDataLength, true);
+  /* RIFF type */
+  view.setUint32(8, 0x57415645, false); // "WAVE"
+  /* format chunk identifier */
+  view.setUint32(12, 0x666d7420, false); // "fmt "
+  /* format chunk length */
+  view.setUint32(16, 16, true);
+  /* sample format (raw) */
+  view.setUint16(20, 1, true);
+  /* channel count */
+  view.setUint16(22, 1, true);
+  /* sample rate */
+  view.setUint32(24, sampleRate, true);
+  /* byte rate (sample rate * block align) */
+  view.setUint32(28, sampleRate * 2, true);
+  /* block align (channel count * bytes per sample) */
+  view.setUint16(32, 2, true);
+  /* bits per sample */
+  view.setUint16(34, 16, true);
+  /* data chunk identifier */
+  view.setUint32(36, 0x64617461, false); // "data"
+  /* data chunk length */
+  view.setUint32(40, pcmDataLength, true);
+
+  return header;
+}
+
+function bufferToHeaderBase64(buffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
 export default function VoiceChatScreen({ navigation }) {
   const { theme, isDark } = useTheme();
   const [status, setStatus] = useState('idle');
@@ -106,13 +150,23 @@ export default function VoiceChatScreen({ navigation }) {
               break;
 
             case 'audio':
-              audioQueueRef.current.push(msg.data);
-              setStatus('aiSpeaking');
-              playAudioQueue();
+              if (msg.data) {
+                audioQueueRef.current.push({ data: msg.data, mimeType: msg.mimeType });
+                if (!isPlayingRef.current) {
+                  setStatus('aiSpeaking');
+                  playAudioQueue();
+                }
+              }
               break;
 
             case 'text':
-              setAiText(msg.data);
+              setAiText((prev) => {
+                // If it's the initial placeholder, clear it
+                if (prev === 'Đang nghe...' || prev === 'Đang xử lý...' || prev === 'Gia sư AI sẵn sàng! Nhấn nút micro để nói.' || prev === 'Nhấn nút micro để bắt đầu trò chuyện') {
+                  return msg.data;
+                }
+                return prev + msg.data;
+              });
               break;
 
             case 'turnComplete':
@@ -149,11 +203,11 @@ export default function VoiceChatScreen({ navigation }) {
 
   const disconnect = useCallback(() => {
     if (recordingRef.current) {
-      recordingRef.current.stopAndUnloadAsync().catch(() => {});
+      recordingRef.current.stopAndUnloadAsync().catch(() => { });
       recordingRef.current = null;
     }
     if (soundRef.current) {
-      soundRef.current.unloadAsync().catch(() => {});
+      soundRef.current.unloadAsync().catch(() => { });
       soundRef.current = null;
     }
     if (wsRef.current) {
@@ -168,27 +222,66 @@ export default function VoiceChatScreen({ navigation }) {
   }, []);
 
   const playAudioQueue = async () => {
-    if (isPlayingRef.current || audioQueueRef.current.length === 0) return;
+    if (isPlayingRef.current) return;
+
+    // Quick exit if queue is empty
+    if (audioQueueRef.current.length === 0) {
+      isPlayingRef.current = false;
+      return;
+    }
+
     isPlayingRef.current = true;
 
-    while (audioQueueRef.current.length > 0) {
-      const base64Audio = audioQueueRef.current.shift();
-      try {
-        const uri = `data:audio/pcm;base64,${base64Audio}`;
+    try {
+      while (audioQueueRef.current.length > 0) {
+        // Shift the first item off the queue immediately
+        const { data, mimeType } = audioQueueRef.current.shift();
+
+        if (!data) continue;
+
+        // Extract sample rate from mimeType (e.g., "audio/pcm;rate=24000")
+        const rateMatch = mimeType?.match(/rate=(\d+)/);
+        const sampleRate = rateMatch ? parseInt(rateMatch[1]) : 24000;
+
+        // Convert base64 to binary to get length
+        const binaryString = atob(data);
+        const pcmLength = binaryString.length;
+
+        // Create WAV header
+        const headerBuffer = createWavHeader(pcmLength, sampleRate);
+        const headerBase64 = bufferToHeaderBase64(headerBuffer);
+
+        // Combine Header + PCM for a playable WAV
+        const uri = `data:audio/wav;base64,${headerBase64}${data}`;
+
         const { sound } = await Audio.Sound.createAsync({ uri });
         soundRef.current = sound;
+
         await sound.playAsync();
+
+        // Wait for this chunk to finish playing before moving to the next
         await new Promise((resolve) => {
           sound.setOnPlaybackStatusUpdate((s) => {
             if (s.didJustFinish) resolve();
+            if (s.error) {
+              console.error('Playback object error:', s.error);
+              resolve();
+            }
           });
         });
+
         await sound.unloadAsync();
-      } catch {
-        // Skip problematic audio chunks
+        soundRef.current = null;
+      }
+    } catch (err) {
+      console.error('Audio chunk playback error:', err);
+    } finally {
+      isPlayingRef.current = false;
+      // If more items sneaked into the queue while we were finishing up, restart processing
+      if (audioQueueRef.current.length > 0) {
+        playAudioQueue();
       }
     }
-    isPlayingRef.current = false;
   };
 
   const startRecording = async () => {
@@ -204,6 +297,15 @@ export default function VoiceChatScreen({ navigation }) {
         return;
       }
 
+      // Stop any current playback if user interrupts
+      if (soundRef.current) {
+        await soundRef.current.stopAsync();
+        await soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+      audioQueueRef.current = [];
+      isPlayingRef.current = false;
+
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
@@ -211,6 +313,7 @@ export default function VoiceChatScreen({ navigation }) {
 
       setStatus('recording');
       setAiText('Đang nghe...');
+      setTranscript('');
 
       const recording = new Audio.Recording();
       await recording.prepareToRecordAsync(RECORDING_OPTIONS);
