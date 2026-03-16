@@ -5,12 +5,14 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { theme } = useTheme();
 
   const handleLogin = async () => {
     if (!email || !password) return Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
@@ -25,21 +27,21 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.inner}>
         <View style={styles.header}>
           <Text style={styles.logo}>🧠</Text>
-          <Text style={styles.title}>SmartLearn AI</Text>
-          <Text style={styles.subtitle}>Trợ lý học tập thông minh</Text>
+          <Text style={[styles.title, { color: theme.text }]}>SmartLearn AI</Text>
+          <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Trợ lý học tập thông minh</Text>
         </View>
 
         <View style={styles.form}>
-          <View style={styles.inputContainer}>
+          <View style={[styles.inputContainer, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <Text style={styles.inputIcon}>📧</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: theme.text }]}
               placeholder="Địa chỉ email"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.textMuted}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -47,12 +49,12 @@ export default function LoginScreen({ navigation }) {
             />
           </View>
 
-          <View style={styles.inputContainer}>
+          <View style={[styles.inputContainer, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <Text style={styles.inputIcon}>🔒</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: theme.text }]}
               placeholder="Mật khẩu"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.textMuted}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -75,8 +77,8 @@ export default function LoginScreen({ navigation }) {
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.link}>
-            <Text style={styles.linkText}>
-              Chưa có tài khoản? <Text style={styles.linkBold}>Đăng ký</Text>
+            <Text style={[styles.linkText, { color: theme.textSecondary }]}>
+              Chưa có tài khoản? <Text style={[styles.linkBold, { color: theme.primary }]}>Đăng ký</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -86,22 +88,22 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F0F23' },
+  container: { flex: 1 },
   inner: { flex: 1, justifyContent: 'center', paddingHorizontal: 30 },
   header: { alignItems: 'center', marginBottom: 50 },
   logo: { fontSize: 64, marginBottom: 16 },
-  title: { fontSize: 32, fontWeight: '800', color: '#FFFFFF', letterSpacing: 1 },
-  subtitle: { fontSize: 14, color: '#8E8EAA', marginTop: 8 },
+  title: { fontSize: 32, fontWeight: '800', letterSpacing: 1 },
+  subtitle: { fontSize: 14, marginTop: 8 },
   form: { gap: 16 },
   inputContainer: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: '#1A1A2E',
-    borderRadius: 16, borderWidth: 1, borderColor: '#2A2A4A', paddingHorizontal: 16, height: 56,
+    flexDirection: 'row', alignItems: 'center',
+    borderRadius: 16, borderWidth: 1, paddingHorizontal: 16, height: 56,
   },
   inputIcon: { fontSize: 18, marginRight: 12 },
-  input: { flex: 1, color: '#FFFFFF', fontSize: 16 },
+  input: { flex: 1, fontSize: 16 },
   button: { height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginTop: 8 },
   buttonText: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
   link: { alignItems: 'center', marginTop: 16 },
-  linkText: { color: '#8E8EAA', fontSize: 14 },
-  linkBold: { color: '#6C63FF', fontWeight: '700' },
+  linkText: { fontSize: 14 },
+  linkBold: { fontWeight: '700' },
 });

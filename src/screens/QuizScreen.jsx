@@ -5,9 +5,18 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { generateQuiz, saveQuizResult } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 
-export default function QuizScreen() {
+export default function QuizScreen({ route }) {
+  const { theme, isDark } = useTheme();
   const [topic, setTopic] = useState('');
+
+  React.useEffect(() => {
+    if (route?.params?.initialTopic) {
+      setTopic(route.params.initialTopic);
+    }
+  }, [route?.params?.initialTopic]);
+
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState(null);
   const [currentQ, setCurrentQ] = useState(0);
@@ -74,22 +83,22 @@ export default function QuizScreen() {
 
   if (showResults && score) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>📊 Kết quả kiểm tra</Text>
+            <Text style={[styles.headerTitle, { color: theme.text }]}>📊 Kết quả kiểm tra</Text>
           </View>
 
           <LinearGradient
-            colors={score.percent >= 70 ? ['#2ED57333', '#1A1A2E'] : ['#FF475733', '#1A1A2E']}
-            style={styles.scoreCard}
+            colors={score.percent >= 70 ? (isDark ? ['#2ED57333', '#1A1A2E'] : ['#2ED57311', theme.surface]) : (isDark ? ['#FF475733', '#1A1A2E'] : ['#FF475711', theme.surface])}
+            style={[styles.scoreCard, { borderColor: theme.border }]}
           >
             <Text style={styles.scoreEmoji}>{score.percent >= 70 ? '🎉' : '💪'}</Text>
-            <Text style={styles.scorePercent}>{score.percent}%</Text>
-            <Text style={styles.scoreText}>
+            <Text style={[styles.scorePercent, { color: theme.text }]}>{score.percent}%</Text>
+            <Text style={[styles.scoreText, { color: theme.textSecondary }]}>
               {score.correct}/{score.total} câu trả lời đúng
             </Text>
-            <Text style={styles.scoreMsg}>
+            <Text style={[styles.scoreMsg, { color: theme.textMuted }]}>
               {score.percent >= 90 ? 'Xuất sắc! Bạn đã nắm vững chủ đề này!' :
                score.percent >= 70 ? 'Làm tốt lắm! Hãy tiếp tục nhé!' :
                score.percent >= 50 ? 'Cố gắng tốt! Xem lại giải thích bên dưới nhé.' :
@@ -101,14 +110,14 @@ export default function QuizScreen() {
             const userAns = answers[i] || 'Chưa trả lời';
             const isCorrect = userAns.toLowerCase().trim() === q.correctAnswer.toLowerCase().trim();
             return (
-              <View key={i} style={[styles.resultCard, isCorrect ? styles.correctCard : styles.wrongCard]}>
+              <View key={i} style={[styles.resultCard, { borderColor: isCorrect ? theme.accent : theme.destructive, backgroundColor: isCorrect ? theme.accentLight : theme.destructiveLight }]}>
                 <View style={styles.resultHeader}>
                   <Text style={styles.resultIcon}>{isCorrect ? '✅' : '❌'}</Text>
-                  <Text style={styles.resultQ} numberOfLines={2}>{q.question}</Text>
+                  <Text style={[styles.resultQ, { color: theme.text }]} numberOfLines={2}>{q.question}</Text>
                 </View>
-                <Text style={styles.resultAnswer}>Câu trả lời của bạn: {userAns}</Text>
-                {!isCorrect && <Text style={styles.correctAnswer}>Đáp án đúng: {q.correctAnswer}</Text>}
-                <Text style={styles.explanation}>{q.explanation}</Text>
+                <Text style={{ color: theme.textSecondary, fontSize: 13, marginBottom: 4 }}>Câu trả lời của bạn: {userAns}</Text>
+                {!isCorrect && <Text style={{ color: theme.accent, fontSize: 13, fontWeight: '600', marginBottom: 4 }}>Đáp án đúng: {q.correctAnswer}</Text>}
+                <Text style={{ color: theme.textMuted, fontSize: 12, lineHeight: 18, marginTop: 6, fontStyle: 'italic' }}>{q.explanation}</Text>
               </View>
             );
           })}
@@ -128,30 +137,30 @@ export default function QuizScreen() {
     const isLastQuestion = currentQ === questions.length - 1;
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>❓ Kiểm tra: {topic}</Text>
-            <Text style={styles.headerSub}>Câu hỏi {currentQ + 1}/{questions.length}</Text>
+            <Text style={[styles.headerTitle, { color: theme.text }]}>❓ Kiểm tra: {topic}</Text>
+            <Text style={[styles.headerSub, { color: theme.textSecondary }]}>Câu hỏi {currentQ + 1}/{questions.length}</Text>
           </View>
 
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${((currentQ + 1) / questions.length) * 100}%` }]} />
+          <View style={[styles.progressBar, { backgroundColor: theme.border }]}>
+            <View style={[styles.progressFill, { width: `${((currentQ + 1) / questions.length) * 100}%`, backgroundColor: theme.primary }]} />
           </View>
 
-          <View style={styles.questionCard}>
-            <View style={styles.typeBadge}>
-              <Text style={styles.typeText}>
+          <View style={[styles.questionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={[styles.typeBadge, { backgroundColor: theme.primaryLight }]}>
+              <Text style={[styles.typeText, { color: theme.primary }]}>
                 {q.type === 'multiple_choice' ? '📝 Trắc nghiệm' : q.type === 'true_false' ? '⚖️ Đúng/Sai' : '✍️ Tự luận ngắn'}
               </Text>
             </View>
-            <Text style={styles.questionText}>{q.question}</Text>
+            <Text style={[styles.questionText, { color: theme.text }]}>{q.question}</Text>
 
             {q.type === 'short_answer' ? (
               <TextInput
-                style={styles.shortInput}
+                style={[styles.shortInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
                 placeholder="Nhập câu trả lời..."
-                placeholderTextColor="#666"
+                placeholderTextColor={theme.textMuted}
                 value={answers[currentQ] || ''}
                 onChangeText={(text) => selectAnswer(currentQ, text)}
               />
@@ -159,10 +168,10 @@ export default function QuizScreen() {
               q.options?.map((opt, oi) => (
                 <TouchableOpacity
                   key={oi}
-                  style={[styles.optionBtn, answers[currentQ] === opt && styles.optionSelected]}
+                  style={[styles.optionBtn, { backgroundColor: theme.background, borderColor: theme.border }, answers[currentQ] === opt && { borderColor: theme.primary, backgroundColor: theme.primaryLight }]}
                   onPress={() => selectAnswer(currentQ, opt)}
                 >
-                  <Text style={[styles.optionText, answers[currentQ] === opt && styles.optionTextSelected]}>
+                  <Text style={[styles.optionText, { color: theme.text }, answers[currentQ] === opt && { color: theme.primary, fontWeight: '600' }]}>
                     {opt}
                   </Text>
                 </TouchableOpacity>
@@ -172,8 +181,8 @@ export default function QuizScreen() {
 
           <View style={styles.navRow}>
             {currentQ > 0 && (
-              <TouchableOpacity style={styles.navBtn} onPress={() => setCurrentQ(currentQ - 1)}>
-                <Text style={styles.navBtnText}>← Trước</Text>
+              <TouchableOpacity style={[styles.navBtn, { backgroundColor: theme.surface }]} onPress={() => setCurrentQ(currentQ - 1)}>
+                <Text style={[styles.navBtnText, { color: theme.primary }]}>← Trước</Text>
               </TouchableOpacity>
             )}
             <View style={{ flex: 1 }} />
@@ -184,8 +193,8 @@ export default function QuizScreen() {
                 </LinearGradient>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity style={styles.navBtn} onPress={() => setCurrentQ(currentQ + 1)}>
-                <Text style={styles.navBtnText}>Tiếp →</Text>
+              <TouchableOpacity style={[styles.navBtn, { backgroundColor: theme.surface }]} onPress={() => setCurrentQ(currentQ + 1)}>
+                <Text style={[styles.navBtnText, { color: theme.primary }]}>Tiếp →</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -195,18 +204,18 @@ export default function QuizScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>❓ Tạo câu hỏi AI</Text>
-          <Text style={styles.headerSub}>Nhập chủ đề và AI sẽ tạo câu hỏi kiểm tra riêng cho bạn</Text>
+          <Text style={[styles.headerTitle, { color: theme.text }]}>❓ Tạo câu hỏi AI</Text>
+          <Text style={[styles.headerSub, { color: theme.textSecondary }]}>Nhập chủ đề và AI sẽ tạo câu hỏi kiểm tra riêng cho bạn</Text>
         </View>
 
         <View style={styles.inputSection}>
           <TextInput
-            style={styles.topicInput}
+            style={[styles.topicInput, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
             placeholder='VD: "Lập trình JavaScript"'
-            placeholderTextColor="#666"
+            placeholderTextColor={theme.textMuted}
             value={topic}
             onChangeText={setTopic}
             editable={!loading}
@@ -223,18 +232,18 @@ export default function QuizScreen() {
         </View>
 
         {loading && (
-          <View style={styles.loadingCard}>
-            <ActivityIndicator size="large" color="#6C63FF" />
-            <Text style={styles.loadingText}>AI đang tạo câu hỏi cho bạn...</Text>
+          <View style={[styles.loadingCard, { backgroundColor: theme.surface }]}>
+            <ActivityIndicator size="large" color={theme.primary} />
+            <Text style={[styles.loadingText, { color: theme.textSecondary }]}>AI đang tạo câu hỏi cho bạn...</Text>
           </View>
         )}
 
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Định dạng bài kiểm tra</Text>
-          <View style={styles.infoRow}><Text style={styles.infoIcon}>📝</Text><Text style={styles.infoText}>5 câu trắc nghiệm</Text></View>
-          <View style={styles.infoRow}><Text style={styles.infoIcon}>⚖️</Text><Text style={styles.infoText}>3 câu đúng/sai</Text></View>
-          <View style={styles.infoRow}><Text style={styles.infoIcon}>✍️</Text><Text style={styles.infoText}>2 câu tự luận ngắn</Text></View>
-          <View style={styles.infoRow}><Text style={styles.infoIcon}>💡</Text><Text style={styles.infoText}>Kèm giải thích chi tiết</Text></View>
+        <View style={[styles.infoCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <Text style={[styles.infoTitle, { color: theme.text }]}>Định dạng bài kiểm tra</Text>
+          <View style={styles.infoRow}><Text style={styles.infoIcon}>📝</Text><Text style={[styles.infoText, { color: theme.textSecondary }]}>5 câu trắc nghiệm</Text></View>
+          <View style={styles.infoRow}><Text style={styles.infoIcon}>⚖️</Text><Text style={[styles.infoText, { color: theme.textSecondary }]}>3 câu đúng/sai</Text></View>
+          <View style={styles.infoRow}><Text style={styles.infoIcon}>✍️</Text><Text style={[styles.infoText, { color: theme.textSecondary }]}>2 câu tự luận ngắn</Text></View>
+          <View style={styles.infoRow}><Text style={styles.infoIcon}>💡</Text><Text style={[styles.infoText, { color: theme.textSecondary }]}>Kèm giải thích chi tiết</Text></View>
         </View>
       </ScrollView>
     </View>
@@ -242,66 +251,55 @@ export default function QuizScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F0F23' },
+  container: { flex: 1 },
   header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16 },
-  headerTitle: { fontSize: 26, fontWeight: '800', color: '#FFF' },
-  headerSub: { fontSize: 13, color: '#8E8EAA', marginTop: 6, lineHeight: 20 },
+  headerTitle: { fontSize: 26, fontWeight: '800' },
+  headerSub: { fontSize: 13, marginTop: 6, lineHeight: 20 },
   inputSection: { paddingHorizontal: 20, gap: 12 },
   topicInput: {
-    backgroundColor: '#1A1A2E', borderRadius: 14, paddingHorizontal: 16, height: 50,
-    color: '#FFF', fontSize: 15, borderWidth: 1, borderColor: '#2A2A4A',
+    borderRadius: 14, paddingHorizontal: 16, height: 50,
+    fontSize: 15, borderWidth: 1,
   },
   generateBtn: { height: 54, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   generateText: { color: '#FFF', fontWeight: '700', fontSize: 16 },
-  loadingCard: { alignItems: 'center', padding: 40, margin: 20, backgroundColor: '#1A1A2E', borderRadius: 16 },
-  loadingText: { color: '#8E8EAA', marginTop: 16, fontSize: 14 },
+  loadingCard: { alignItems: 'center', padding: 40, margin: 20, borderRadius: 16 },
+  loadingText: { marginTop: 16, fontSize: 14 },
   infoCard: {
-    backgroundColor: '#1A1A2E', margin: 20, borderRadius: 16, padding: 20,
-    borderWidth: 1, borderColor: '#2A2A4A',
+    margin: 20, borderRadius: 16, padding: 20, borderWidth: 1,
   },
-  infoTitle: { color: '#FFF', fontSize: 16, fontWeight: '700', marginBottom: 14 },
+  infoTitle: { fontSize: 16, fontWeight: '700', marginBottom: 14 },
   infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
   infoIcon: { fontSize: 18, marginRight: 10 },
-  infoText: { color: '#B8B8D0', fontSize: 14 },
-  progressBar: { height: 6, backgroundColor: '#2A2A4A', marginHorizontal: 20, borderRadius: 3, marginBottom: 20 },
-  progressFill: { height: 6, backgroundColor: '#6C63FF', borderRadius: 3 },
+  infoText: { fontSize: 14 },
+  progressBar: { height: 6, marginHorizontal: 20, borderRadius: 3, marginBottom: 20 },
+  progressFill: { height: 6, borderRadius: 3 },
   questionCard: {
-    backgroundColor: '#1A1A2E', marginHorizontal: 20, borderRadius: 16, padding: 24,
-    borderWidth: 1, borderColor: '#2A2A4A',
+    marginHorizontal: 20, borderRadius: 16, padding: 24, borderWidth: 1,
   },
-  typeBadge: { backgroundColor: '#6C63FF22', alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, marginBottom: 16 },
-  typeText: { color: '#6C63FF', fontSize: 12, fontWeight: '700' },
-  questionText: { color: '#FFF', fontSize: 17, fontWeight: '600', lineHeight: 26, marginBottom: 20 },
+  typeBadge: { alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, marginBottom: 16 },
+  typeText: { fontSize: 12, fontWeight: '700' },
+  questionText: { fontSize: 17, fontWeight: '600', lineHeight: 26, marginBottom: 20 },
   optionBtn: {
-    backgroundColor: '#0F0F23', borderRadius: 12, padding: 16, marginBottom: 10,
-    borderWidth: 1, borderColor: '#2A2A4A',
+    borderRadius: 12, padding: 16, marginBottom: 10, borderWidth: 1,
   },
-  optionSelected: { borderColor: '#6C63FF', backgroundColor: '#6C63FF11' },
-  optionText: { color: '#CCC', fontSize: 15 },
-  optionTextSelected: { color: '#6C63FF', fontWeight: '600' },
+  optionText: { fontSize: 15 },
   shortInput: {
-    backgroundColor: '#0F0F23', borderRadius: 12, padding: 16, color: '#FFF',
-    fontSize: 15, borderWidth: 1, borderColor: '#2A2A4A',
+    borderRadius: 12, padding: 16, fontSize: 15, borderWidth: 1,
   },
   navRow: { flexDirection: 'row', paddingHorizontal: 20, marginTop: 20 },
-  navBtn: { backgroundColor: '#1A1A2E', paddingHorizontal: 20, paddingVertical: 14, borderRadius: 12 },
-  navBtnText: { color: '#6C63FF', fontWeight: '700', fontSize: 14 },
+  navBtn: { paddingHorizontal: 20, paddingVertical: 14, borderRadius: 12 },
+  navBtnText: { fontWeight: '700', fontSize: 14 },
   submitBtn: { paddingHorizontal: 30, paddingVertical: 14, borderRadius: 12 },
   submitText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
-  scoreCard: { marginHorizontal: 20, borderRadius: 20, padding: 30, alignItems: 'center', marginBottom: 20, borderWidth: 1, borderColor: '#2A2A4A' },
+  scoreCard: { marginHorizontal: 20, borderRadius: 20, padding: 30, alignItems: 'center', marginBottom: 20, borderWidth: 1 },
   scoreEmoji: { fontSize: 48, marginBottom: 10 },
-  scorePercent: { color: '#FFF', fontSize: 48, fontWeight: '900' },
-  scoreText: { color: '#B8B8D0', fontSize: 16, marginTop: 6 },
-  scoreMsg: { color: '#8E8EAA', fontSize: 14, textAlign: 'center', marginTop: 10, lineHeight: 22 },
+  scorePercent: { fontSize: 48, fontWeight: '900' },
+  scoreText: { fontSize: 16, marginTop: 6 },
+  scoreMsg: { fontSize: 14, textAlign: 'center', marginTop: 10, lineHeight: 22 },
   resultCard: { marginHorizontal: 20, borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1 },
-  correctCard: { backgroundColor: '#2ED57310', borderColor: '#2ED57344' },
-  wrongCard: { backgroundColor: '#FF475710', borderColor: '#FF475744' },
   resultHeader: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 },
   resultIcon: { fontSize: 18, marginRight: 10, marginTop: 2 },
-  resultQ: { color: '#FFF', fontSize: 14, fontWeight: '600', flex: 1 },
-  resultAnswer: { color: '#B8B8D0', fontSize: 13, marginBottom: 4 },
-  correctAnswer: { color: '#2ED573', fontSize: 13, fontWeight: '600', marginBottom: 4 },
-  explanation: { color: '#8E8EAA', fontSize: 12, lineHeight: 18, marginTop: 6, fontStyle: 'italic' },
+  resultQ: { fontSize: 14, fontWeight: '600', flex: 1 },
   resetBtn: { marginHorizontal: 20, height: 54, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginTop: 10 },
   resetText: { color: '#FFF', fontWeight: '700', fontSize: 16 },
 });

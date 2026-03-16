@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { generateRoadmap } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 
 const EXAMPLES = ['React Native', 'Machine Learning', 'Thiết kế UI/UX', 'Học JavaScript'];
 
 export default function CreateRoadmapScreen({ navigation }) {
+  const { theme } = useTheme();
   const [topic, setTopic] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -29,29 +31,29 @@ export default function CreateRoadmapScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.headerTitle}>Tạo Lộ Trình Học Tập</Text>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <Text style={[styles.headerTitle, { color: theme.text }]}>Tạo Lộ Trình Học Tập</Text>
 
-      <Text style={styles.label}>Bạn muốn học gì?</Text>
+      <Text style={[styles.label, { color: theme.textSecondary }]}>Bạn muốn học gì?</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
         placeholder="Nhập chủ đề... (VD: React Native)"
-        placeholderTextColor="#8E8E93"
+        placeholderTextColor={theme.textMuted}
         value={topic}
         onChangeText={setTopic}
       />
 
-      <Text style={styles.subLabel}>Hoặc chọn chủ đề gợi ý:</Text>
+      <Text style={[styles.subLabel, { color: theme.textMuted }]}>Hoặc chọn chủ đề gợi ý:</Text>
       <View style={styles.tagsContainer}>
         {EXAMPLES.map((ex, idx) => (
-          <TouchableOpacity key={idx} style={styles.tag} onPress={() => setTopic(ex)}>
-            <Text style={styles.tagText}>{ex}</Text>
+          <TouchableOpacity key={idx} style={[styles.tag, { backgroundColor: theme.surface }]} onPress={() => setTopic(ex)}>
+            <Text style={[styles.tagText, { color: theme.textSecondary }]}>{ex}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
       <TouchableOpacity 
-        style={[styles.button, loading && styles.buttonDisabled]} 
+        style={[styles.button, { backgroundColor: theme.primary, shadowColor: theme.primary }, loading && styles.buttonDisabled]} 
         onPress={handleGenerate}
         disabled={loading}
       >
@@ -66,36 +68,30 @@ export default function CreateRoadmapScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F0F23', padding: 20, paddingTop: 60 },
-  headerTitle: { color: '#FFF', fontSize: 24, fontWeight: 'bold', marginBottom: 30, textAlign: 'center' },
-  label: { color: '#CCC', fontSize: 16, marginBottom: 10 },
+  container: { flex: 1, padding: 20, paddingTop: 60 },
+  headerTitle: { fontSize: 24, fontWeight: 'bold', marginBottom: 30, textAlign: 'center' },
+  label: { fontSize: 16, marginBottom: 10 },
   input: {
-    backgroundColor: '#1A1A2E',
-    color: '#FFF',
     padding: 15,
     borderRadius: 12,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#2A2A4A',
     marginBottom: 20,
   },
-  subLabel: { color: '#8E8E93', fontSize: 14, marginBottom: 10 },
+  subLabel: { fontSize: 14, marginBottom: 10 },
   tagsContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 40 },
   tag: {
-    backgroundColor: '#2A2A4A',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
     marginRight: 10,
     marginBottom: 10,
   },
-  tagText: { color: '#CCC', fontSize: 14 },
+  tagText: { fontSize: 14 },
   button: {
-    backgroundColor: '#6C63FF',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: '#6C63FF',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,

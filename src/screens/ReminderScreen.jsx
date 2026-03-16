@@ -5,6 +5,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import { useTheme } from '../context/ThemeContext';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -15,6 +16,7 @@ Notifications.setNotificationHandler({
 });
 
 export default function ReminderScreen({ navigation }) {
+  const { theme, isDark } = useTheme();
   const [enabled, setEnabled] = useState(false);
   const [hour, setHour] = useState(9);
   const [minute, setMinute] = useState(0);
@@ -87,58 +89,58 @@ export default function ReminderScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>⏰ Nhắc lịch học</Text>
-        <Text style={styles.headerSub}>Không bỏ lỡ mục tiêu học tập hàng ngày</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Analytics')} style={styles.analyticsBtn}>
-          <Text style={styles.analyticsText}>📊 Thống kê</Text>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>⏰ Nhắc lịch học</Text>
+        <Text style={[styles.headerSub, { color: theme.textSecondary }]}>Không bỏ lỡ mục tiêu học tập hàng ngày</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Analytics')} style={[styles.analyticsBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <Text style={[styles.analyticsText, { color: theme.primary }]}>📊 Thống kê</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
         <View style={styles.toggleRow}>
           <View>
-            <Text style={styles.cardTitle}>Nhắc nhở hàng ngày</Text>
-            <Text style={styles.cardSub}>Nhận thông báo nhắc học mỗi ngày</Text>
+            <Text style={[styles.cardTitle, { color: theme.text }]}>Nhắc nhở hàng ngày</Text>
+            <Text style={[styles.cardSub, { color: theme.textSecondary }]}>Nhận thông báo nhắc học mỗi ngày</Text>
           </View>
           <Switch
             value={enabled}
             onValueChange={toggleReminder}
-            trackColor={{ false: '#2A2A4A', true: '#6C63FF66' }}
-            thumbColor={enabled ? '#6C63FF' : '#555'}
+            trackColor={{ false: theme.border, true: theme.primary + '66' }}
+            thumbColor={enabled ? theme.primary : (isDark ? '#555' : '#E5E7EB')}
           />
         </View>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>🕐 Giờ học</Text>
+      <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+        <Text style={[styles.cardTitle, { color: theme.text }]}>🕐 Giờ học</Text>
         <View style={styles.timeContainer}>
           <View style={styles.timeColumn}>
             <TouchableOpacity onPress={() => adjustTime('hour', 1)} style={styles.timeBtn}>
-              <Text style={styles.timeBtnText}>▲</Text>
+              <Text style={[styles.timeBtnText, { color: theme.primary }]}>▲</Text>
             </TouchableOpacity>
-            <Text style={styles.timeDigit}>{(hour % 12 || 12).toString().padStart(2, '0')}</Text>
+            <Text style={[styles.timeDigit, { color: theme.text }]}>{(hour % 12 || 12).toString().padStart(2, '0')}</Text>
             <TouchableOpacity onPress={() => adjustTime('hour', -1)} style={styles.timeBtn}>
-              <Text style={styles.timeBtnText}>▼</Text>
+              <Text style={[styles.timeBtnText, { color: theme.primary }]}>▼</Text>
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.timeSep}>:</Text>
+          <Text style={[styles.timeSep, { color: theme.primary }]}>:</Text>
 
           <View style={styles.timeColumn}>
             <TouchableOpacity onPress={() => adjustTime('minute', 5)} style={styles.timeBtn}>
-              <Text style={styles.timeBtnText}>▲</Text>
+              <Text style={[styles.timeBtnText, { color: theme.primary }]}>▲</Text>
             </TouchableOpacity>
-            <Text style={styles.timeDigit}>{minute.toString().padStart(2, '0')}</Text>
+            <Text style={[styles.timeDigit, { color: theme.text }]}>{minute.toString().padStart(2, '0')}</Text>
             <TouchableOpacity onPress={() => adjustTime('minute', -5)} style={styles.timeBtn}>
-              <Text style={styles.timeBtnText}>▼</Text>
+              <Text style={[styles.timeBtnText, { color: theme.primary }]}>▼</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.timeColumn}>
-            <TouchableOpacity onPress={() => setHour((prev) => (prev + 12) % 24)} style={styles.periodBtn}>
-              <Text style={styles.periodText}>{hour >= 12 ? 'CH' : 'SA'}</Text>
+            <TouchableOpacity onPress={() => setHour((prev) => (prev + 12) % 24)} style={[styles.periodBtn, { backgroundColor: theme.primaryLight }]}>
+              <Text style={[styles.periodText, { color: theme.primary }]}>{hour >= 12 ? 'CH' : 'SA'}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -153,57 +155,57 @@ export default function ReminderScreen({ navigation }) {
       )}
 
       {scheduled && (
-        <View style={styles.statusCard}>
+        <View style={[styles.statusCard, { backgroundColor: theme.accentLight, borderColor: theme.accent }]}>
           <Text style={styles.statusIcon}>✅</Text>
           <View>
-            <Text style={styles.statusTitle}>Nhắc nhở đang hoạt động</Text>
-            <Text style={styles.statusTime}>Hàng ngày lúc {formatTime(hour, minute)}</Text>
+            <Text style={[styles.statusTitle, { color: theme.accent }]}>Nhắc nhở đang hoạt động</Text>
+            <Text style={[styles.statusTime, { color: theme.textSecondary }]}>Hàng ngày lúc {formatTime(hour, minute)}</Text>
           </View>
         </View>
       )}
 
-      <View style={[styles.card, { marginTop: 20 }]}>
-        <Text style={styles.infoTitle}>💡 Mẹo học tập</Text>
-        <Text style={styles.infoText}>• Kiên trì là chìa khóa - học mỗi ngày một ít</Text>
-        <Text style={styles.infoText}>• Buổi sáng là thời điểm học hiệu quả nhất</Text>
-        <Text style={styles.infoText}>• Nghỉ giải lao sau mỗi 25 phút (Pomodoro)</Text>
-        <Text style={styles.infoText}>• Ôn lại bài kiểm tra để củng cố kiến thức</Text>
+      <View style={[styles.card, { marginTop: 20, backgroundColor: theme.surface, borderColor: theme.border }]}>
+        <Text style={[styles.infoTitle, { color: theme.text }]}>💡 Mẹo học tập</Text>
+        <Text style={[styles.infoText, { color: theme.textSecondary }]}>• Kiên trì là chìa khóa - học mỗi ngày một ít</Text>
+        <Text style={[styles.infoText, { color: theme.textSecondary }]}>• Buổi sáng là thời điểm học hiệu quả nhất</Text>
+        <Text style={[styles.infoText, { color: theme.textSecondary }]}>• Nghỉ giải lao sau mỗi 25 phút (Pomodoro)</Text>
+        <Text style={[styles.infoText, { color: theme.textSecondary }]}>• Ôn lại bài kiểm tra để củng cố kiến thức</Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F0F23' },
+  container: { flex: 1 },
   header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
-  headerTitle: { fontSize: 26, fontWeight: '800', color: '#FFF' },
-  headerSub: { fontSize: 13, color: '#8E8EAA', marginTop: 6 },
-  analyticsBtn: { backgroundColor: '#1A1A2E', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, alignSelf: 'flex-start', marginTop: 12, borderWidth: 1, borderColor: '#2A2A4A' },
-  analyticsText: { color: '#6C63FF', fontWeight: '700', fontSize: 14 },
+  headerTitle: { fontSize: 26, fontWeight: '800' },
+  headerSub: { fontSize: 13, marginTop: 6 },
+  analyticsBtn: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, alignSelf: 'flex-start', marginTop: 12, borderWidth: 1 },
+  analyticsText: { fontWeight: '700', fontSize: 14 },
   card: {
-    backgroundColor: '#1A1A2E', marginHorizontal: 20, borderRadius: 16, padding: 20,
-    marginBottom: 16, borderWidth: 1, borderColor: '#2A2A4A',
+    marginHorizontal: 20, borderRadius: 16, padding: 20,
+    marginBottom: 16, borderWidth: 1,
   },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardTitle: { color: '#FFF', fontSize: 18, fontWeight: '700' },
-  cardSub: { color: '#8E8EAA', fontSize: 13, marginTop: 4 },
+  cardTitle: { fontSize: 18, fontWeight: '700' },
+  cardSub: { fontSize: 13, marginTop: 4 },
   timeContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20, gap: 10 },
   timeColumn: { alignItems: 'center' },
   timeBtn: { padding: 10 },
-  timeBtnText: { color: '#6C63FF', fontSize: 20, fontWeight: '700' },
-  timeDigit: { color: '#FFF', fontSize: 42, fontWeight: '800', width: 70, textAlign: 'center' },
-  timeSep: { color: '#6C63FF', fontSize: 42, fontWeight: '800', marginBottom: 10 },
-  periodBtn: { backgroundColor: '#6C63FF22', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12 },
-  periodText: { color: '#6C63FF', fontSize: 18, fontWeight: '800' },
+  timeBtnText: { fontSize: 20, fontWeight: '700' },
+  timeDigit: { fontSize: 42, fontWeight: '800', width: 70, textAlign: 'center' },
+  timeSep: { fontSize: 42, fontWeight: '800', marginBottom: 10 },
+  periodBtn: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12 },
+  periodText: { fontSize: 18, fontWeight: '800' },
   saveBtn: { height: 54, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   saveBtnText: { color: '#FFF', fontWeight: '700', fontSize: 16 },
   statusCard: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: '#2ED57315', margin: 20,
-    borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#2ED57344', gap: 12,
+    flexDirection: 'row', alignItems: 'center', margin: 20,
+    borderRadius: 14, padding: 16, borderWidth: 1, gap: 12,
   },
   statusIcon: { fontSize: 28 },
-  statusTitle: { color: '#2ED573', fontSize: 15, fontWeight: '700' },
-  statusTime: { color: '#8E8EAA', fontSize: 13, marginTop: 2 },
-  infoTitle: { color: '#FFF', fontSize: 16, fontWeight: '700', marginBottom: 12 },
-  infoText: { color: '#8E8EAA', fontSize: 13, lineHeight: 22 },
+  statusTitle: { fontSize: 15, fontWeight: '700' },
+  statusTime: { fontSize: 13, marginTop: 2 },
+  infoTitle: { fontSize: 16, fontWeight: '700', marginBottom: 12 },
+  infoText: { fontSize: 13, lineHeight: 22 },
 });

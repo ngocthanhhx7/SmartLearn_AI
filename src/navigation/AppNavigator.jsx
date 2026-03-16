@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
@@ -13,6 +14,9 @@ import QuizScreen from '../screens/QuizScreen';
 import ChatScreen from '../screens/ChatScreen';
 import ReminderScreen from '../screens/ReminderScreen';
 import AnalyticsScreen from '../screens/AnalyticsScreen';
+import MoreScreen from '../screens/MoreScreen';
+import StopwatchScreen from '../screens/StopwatchScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 
 import CreateRoadmapScreen from '../screens/CreateRoadmapScreen';
 import PreviewRoadmapScreen from '../screens/PreviewRoadmapScreen';
@@ -34,13 +38,17 @@ const tabConfig = {
 function MoreStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="MoreMenu" component={MoreScreen} />
       <Stack.Screen name="Reminders" component={ReminderScreen} />
       <Stack.Screen name="Analytics" component={AnalyticsScreen} />
+      <Stack.Screen name="Stopwatch" component={StopwatchScreen} />
+      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
     </Stack.Navigator>
   );
 }
 
 function MainTabs() {
+  const { theme } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -50,11 +58,11 @@ function MainTabs() {
             {tabConfig[route.name]}
           </Text>
         ),
-        tabBarActiveTintColor: '#6C63FF',
-        tabBarInactiveTintColor: '#8E8E93',
+        tabBarActiveTintColor: theme.primary,
+        tabBarInactiveTintColor: theme.textMuted,
         tabBarStyle: {
-          backgroundColor: '#1A1A2E',
-          borderTopColor: '#2A2A4A',
+          backgroundColor: theme.surface,
+          borderTopColor: theme.border,
           borderTopWidth: 1,
           paddingBottom: 8,
           paddingTop: 8,
@@ -98,11 +106,12 @@ function AuthenticatedStack() {
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
+  const { theme } = useTheme();
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0F0F23' }}>
-        <ActivityIndicator size="large" color="#6C63FF" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }}>
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }

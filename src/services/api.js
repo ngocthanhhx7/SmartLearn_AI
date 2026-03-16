@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://192.168.2.18:5000/api'; // Host IP for physical device
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://smartlearn-backend-qxm7.onrender.com/api';
 const api = axios.create({
   baseURL: API_URL,
   timeout: 60000,
@@ -30,6 +30,7 @@ export const analyzePerformance = (studyData, quizData) =>
 
 // Study
 export const createStudySession = (data) => api.post('/study/session', data);
+export const saveQuizResult = (data) => api.post('/study/quiz-result', data);
 // Roadmaps
 export const generateRoadmap = (topic) => api.post('/ai/generate-roadmap', { topic });
 export const saveRoadmap = (data) => api.post('/roadmap/save', data);
@@ -38,5 +39,6 @@ export const getRoadmapById = (id) => api.get(`/roadmap/${id}`);
 
 // Analytics
 export const getAnalytics = () => api.get('/analytics');
+export const getProgress = () => api.get('/analytics');
 
 export default api;
