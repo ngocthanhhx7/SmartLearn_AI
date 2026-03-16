@@ -26,6 +26,8 @@ export default function DashboardScreen({ navigation }) {
           avgQuizScore: data.avgScore || 0,
           uniqueTopics: Object.keys(data.topicFrequency || {}).length,
           totalSessions: data.totalSessions || 0,
+          todaySessions: data.todaySessions || 0,
+          todayQuizzes: data.todayQuizzes || 0,
         }
       });
     } catch {
@@ -117,14 +119,14 @@ export default function DashboardScreen({ navigation }) {
           <Text style={[styles.cardTitle, { color: theme.text }]}>🎯 Mục tiêu hôm nay</Text>
           <Text style={[styles.cardSubtitle, { color: theme.textSecondary }]}>Hoàn thành ít nhất một buổi học và một bài kiểm tra!</Text>
           <View style={styles.goalRow}>
-            <View style={[styles.goalDot, { backgroundColor: theme.surfaceAlt }, stats.totalSessions > 0 && { backgroundColor: theme.accent }]} />
+            <View style={[styles.goalDot, { backgroundColor: theme.surfaceAlt }, stats.todaySessions > 0 && { backgroundColor: theme.accent }]} />
             <Text style={[styles.goalText, { color: theme.textMuted }]}>Buổi học</Text>
-            {stats.totalSessions > 0 && <Text style={styles.goalCheck}>✅</Text>}
+            {stats.todaySessions > 0 && <Text style={styles.goalCheck}>✅</Text>}
           </View>
           <View style={styles.goalRow}>
-            <View style={[styles.goalDot, { backgroundColor: theme.surfaceAlt }, stats.totalQuizzes > 0 && { backgroundColor: theme.accent }]} />
+            <View style={[styles.goalDot, { backgroundColor: theme.surfaceAlt }, stats.todayQuizzes > 0 && { backgroundColor: theme.accent }]} />
             <Text style={[styles.goalText, { color: theme.textMuted }]}>Bài kiểm tra</Text>
-            {stats.totalQuizzes > 0 && <Text style={styles.goalCheck}>✅</Text>}
+            {stats.todayQuizzes > 0 && <Text style={styles.goalCheck}>✅</Text>}
           </View>
         </View>
 

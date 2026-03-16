@@ -56,8 +56,8 @@ export default function VoiceChatScreen({ navigation }) {
     if (status === 'recording') {
       Animated.loop(
         Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1.2, duration: 600, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1.2, duration: 600, useNativeDriver: false }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 600, useNativeDriver: false }),
         ])
       ).start();
       Animated.timing(glowAnim, { toValue: 1, duration: 300, useNativeDriver: false }).start();
@@ -71,7 +71,7 @@ export default function VoiceChatScreen({ navigation }) {
     } else {
       pulseAnim.stopAnimation();
       glowAnim.stopAnimation();
-      Animated.timing(pulseAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+      Animated.timing(pulseAnim, { toValue: 1, duration: 200, useNativeDriver: false }).start();
       Animated.timing(glowAnim, { toValue: 0, duration: 200, useNativeDriver: false }).start();
     }
   }, [status]);
