@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "SmartLearn_AI",
+    "name": "SmartLearn AI",
     "slug": "SmartLearn_AI",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -20,10 +20,16 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "package": "com.ngocthanhhx7.smartlearnai"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b7ce46aa-0ef6-4449-80ab-499896eabcdc"
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
+  View, Text, TextInput, TouchableOpacity, Image,
   StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,7 +30,7 @@ export default function LoginScreen({ navigation }) {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.inner}>
         <View style={styles.header}>
-          <Text style={styles.logo}>🧠</Text>
+          <Image style={styles.logo} source={require('../../assets/icon.png')} />
           <Text style={[styles.title, { color: theme.text }]}>SmartLearn AI</Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Trợ lý học tập thông minh</Text>
         </View>
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   inner: { flex: 1, justifyContent: 'center', paddingHorizontal: 30 },
   header: { alignItems: 'center', marginBottom: 50 },
-  logo: { fontSize: 64, marginBottom: 16 },
+  logo: { width: 100, height: 100, marginBottom: 16, resizeMode: 'contain' },
   title: { fontSize: 32, fontWeight: '800', letterSpacing: 1 },
   subtitle: { fontSize: 14, marginTop: 8 },
   form: { gap: 16 },

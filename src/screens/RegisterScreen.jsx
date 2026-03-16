@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
+  View, Text, TextInput, TouchableOpacity, Image,
   StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -47,7 +47,7 @@ export default function RegisterScreen({ navigation }) {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.inner} showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
-            <Text style={styles.logo}>🧠</Text>
+            <Image style={styles.logo} source={require('../../assets/icon.png')} />
             <Text style={[styles.title, { color: theme.text }]}>Tạo tài khoản</Text>
             <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Bắt đầu hành trình học tập của bạn</Text>
           </View>
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   inner: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 30, paddingVertical: 50 },
   header: { alignItems: 'center', marginBottom: 40 },
-  logo: { fontSize: 56, marginBottom: 12 },
+  logo: { width: 80, height: 80, marginBottom: 12, resizeMode: 'contain' },
   title: { fontSize: 28, fontWeight: '800', letterSpacing: 1 },
   subtitle: { fontSize: 14, marginTop: 6 },
   form: { gap: 14 },
