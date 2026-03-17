@@ -44,3 +44,6 @@ server/.env
 
 # backend server
 server/
+
+# local copilot agent metadata
+.agent/
