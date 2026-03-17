@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { loginUser, registerUser, updateProfile } from '../services/api';
+import { loginUser, registerUser, updateProfile, googleAuth } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -48,6 +48,16 @@ export function AuthProvider({ children }) {
     return userData;
   };
 
+  const googleLogin = async ({ email, name, avatar, googleId }) => {
+    const res = await googleAuth({ email, name, avatar, googleId });
+    const { token: newToken, user: userData } = res.data;
+    await AsyncStorage.setItem('token', newToken);
+    await AsyncStorage.setItem('user', JSON.stringify(userData));
+    setToken(newToken);
+    setUser(userData);
+    return userData;
+  };
+
   const updateUser = async (data) => {
     const res = await updateProfile(data);
     const updatedUser = res.data.user;
@@ -63,7 +73,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, updateUser, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, googleLogin, updateUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -2,6 +2,7 @@
   "expo": {
     "name": "SmartLearn AI",
     "slug": "SmartLearn_AI",
+    "scheme": "smartlearnai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -34,6 +35,9 @@
       "eas": {
         "projectId": "b7ce46aa-0ef6-4449-80ab-499896eabcdc"
       }
-    }
+    },
+    "plugins": [
+      "expo-web-browser"
+    ]
   }
 }
