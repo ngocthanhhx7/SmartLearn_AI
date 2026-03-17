@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, TextInput, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
+import { createStudySession } from '../services/api';
 
 export default function StopwatchScreen({ navigation }) {
   const { theme, isDark } = useTheme();
   const [time, setTime] = useState(0); // in seconds
   const [isRunning, setIsRunning] = useState(false);
   const [mode, setMode] = useState('stopwatch'); // stopwatch, pomodoro (25m), shortBreak (5m)
-  
+  const [topic, setTopic] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [savedTime, setSavedTime] = useState(0); // accumulated saved seconds
+
   const timerRef = useRef(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -50,6 +54,31 @@ export default function StopwatchScreen({ navigation }) {
     else setTime(0);
   };
 
+  const saveSession = async () => {
+    if (!topic.trim()) {
+      Alert.alert('Thiếu chủ đề', 'Vui lòng nhập chủ đề bạn đang học.');
+      return;
+    }
+    const totalSeconds = savedTime + time;
+    const minutes = Math.round(totalSeconds / 60);
+    if (minutes < 1) {
+      Alert.alert('Thời gian quá ngắn', 'Hãy học ít nhất 1 phút trước khi lưu.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await createStudySession({ topic: topic.trim(), duration: minutes });
+      Alert.alert('Đã lưu!', `Đã ghi nhận ${minutes} phút học chủ đề "${topic.trim()}".`);
+      setSavedTime(0);
+      setTime(0);
+      setIsRunning(false);
+    } catch (err) {
+      Alert.alert('Lỗi', 'Không thể lưu buổi học. Vui lòng thử lại.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const changeMode = (newMode) => {
     setIsRunning(false);
     setMode(newMode);
@@ -63,6 +92,8 @@ export default function StopwatchScreen({ navigation }) {
     const s = (seconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
+
+  const canSave = (savedTime + time) >= 60 && !isRunning;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -90,6 +121,17 @@ export default function StopwatchScreen({ navigation }) {
         </Animated.View>
       </View>
 
+      <View style={[styles.topicSection, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+        <Text style={[styles.topicLabel, { color: theme.textSecondary }]}>📖 Chủ đề đang học</Text>
+        <TextInput
+          style={[styles.topicInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+          placeholder='VD: "Lập trình Python", "Toán giải tích"...'
+          placeholderTextColor={theme.textMuted}
+          value={topic}
+          onChangeText={setTopic}
+        />
+      </View>
+
       <View style={styles.controls}>
         <TouchableOpacity onPress={toggleTimer} activeOpacity={0.8} style={{ flex: 1, marginRight: 10 }}>
           <LinearGradient colors={isRunning ? ['#FF4757', '#EE5253'] : ['#2ED573', '#1ABC9C']} style={styles.controlBtn}>
@@ -104,6 +146,22 @@ export default function StopwatchScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
+      <TouchableOpacity
+        onPress={saveSession}
+        disabled={!canSave || saving}
+        activeOpacity={0.8}
+        style={{ paddingHorizontal: 20, marginTop: 12 }}
+      >
+        <LinearGradient
+          colors={canSave && !saving ? ['#6C63FF', '#4834DF'] : [theme.border, theme.border]}
+          style={styles.saveBtn}
+        >
+          <Text style={[styles.saveBtnText, !canSave && { color: theme.textMuted }]}>
+            {saving ? '⏳ Đang lưu...' : `💾 Lưu buổi học  (${Math.floor((savedTime + time) / 60)} phút)`}
+          </Text>
+        </LinearGradient>
+      </TouchableOpacity>
+
       <View style={[styles.infoCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
         <Text style={styles.infoTitle}>💡 Phương pháp Pomodoro</Text>
         <Text style={[styles.infoDesc, { color: theme.textSecondary }]}>Học tập trung trong 25 phút, sau đó nghỉ ngắn 5 phút. Lặp lại 4 lần sẽ có một kỳ nghỉ dài hơn. Giúp tăng hiệu suất và giảm căng thẳng trí não.</Text>
@@ -114,7 +172,12 @@ export default function StopwatchScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 12 },
+  topicSection: { marginHorizontal: 20, borderRadius: 12, padding: 14, marginBottom: 16, borderWidth: 1 },
+  topicLabel: { fontSize: 12, fontWeight: '600', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  topicInput: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15 },
+  saveBtn: { paddingVertical: 16, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  saveBtnText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
   backBtn: { width: 40, height: 40, justifyContent: 'center' },
   backIcon: { fontSize: 24 },
   headerTitle: { fontSize: 22, fontWeight: '800' },

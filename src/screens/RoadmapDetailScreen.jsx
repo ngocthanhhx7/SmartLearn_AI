@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Linking, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getRoadmapById } from '../services/api';
+import { getRoadmapById, createStudySession } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
 
 export default function RoadmapDetailScreen({ navigation, route }) {
@@ -9,9 +9,19 @@ export default function RoadmapDetailScreen({ navigation, route }) {
   const { id, topic } = route.params;
   const [roadmapData, setRoadmapData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const entryTimeRef = useRef(Date.now());
 
   useEffect(() => {
     loadDetail();
+    // Reset entry time each time screen is mounted
+    entryTimeRef.current = Date.now();
+    return () => {
+      // Save study session when user leaves this screen
+      const minutes = Math.floor((Date.now() - entryTimeRef.current) / 60000);
+      if (minutes >= 1 && topic) {
+        createStudySession({ topic, duration: minutes }).catch(() => {});
+      }
+    };
   }, []);
 
   const loadDetail = async () => {
