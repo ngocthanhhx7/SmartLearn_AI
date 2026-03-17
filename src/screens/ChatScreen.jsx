@@ -13,7 +13,7 @@ export default function ChatScreen({ navigation }) {
   const { theme } = useTheme();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Xin chào! Mình là Gia sư AI của bạn. 👋\n\nMình có thể giải thích khái niệm, đưa ví dụ, so sánh ý tưởng và giúp bạn học bất kỳ chủ đề nào.\n\n📷 Bạn cũng có thể gửi ảnh bài tập để mình giải thích nhé!\n\nBạn muốn học gì hôm nay?' },
+    { role: 'assistant', content: 'Chào bạn! Tôi là Gia sư AI của Smartlearn. Hôm nay bạn muốn ôn tập kiến thức nào hay có câu hỏi gì cần giải đáp không?' },
   ]);
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -107,22 +107,29 @@ export default function ChatScreen({ navigation }) {
     }
   };
 
+  const sendQuickMessage = (text) => {
+    setMessage(text);
+  };
+
+  const showQuickReplies = messages.length <= 2 && !loading;
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
-        <View style={styles.headerLeft}>
-          <View style={[styles.avatarContainer, { backgroundColor: theme.primaryLight, borderColor: theme.primaryLight }]}>
-            <Text style={styles.avatarText}>🤖</Text>
-          </View>
-          <View>
-            <Text style={[styles.headerTitle, { color: theme.text }]}>Gia sư AI</Text>
-            <View style={styles.statusRow}>
-              <View style={[styles.statusDot, { backgroundColor: theme.accent }]} />
-              <Text style={[styles.headerSub, { color: theme.textSecondary }]}>Sẵn sàng hỗ trợ bạn</Text>
-            </View>
+      <View style={[styles.header, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Text style={[styles.backIcon, { color: theme.text }]}>←</Text>
+        </TouchableOpacity>
+        <View style={styles.headerCenter}>
+          <Text style={[styles.headerTitle, { color: theme.primary }]}>Gia sư AI</Text>
+          <View style={styles.statusRow}>
+            <View style={styles.statusDot} />
+            <Text style={[styles.headerSub, { color: theme.textMuted }]}>Sẵn sàng hỗ trợ bạn</Text>
           </View>
         </View>
+        <TouchableOpacity style={styles.menuBtn}>
+          <Text style={[styles.menuIcon, { color: theme.text }]}>⋮</Text>
+        </TouchableOpacity>
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={0}>
@@ -134,37 +141,70 @@ export default function ChatScreen({ navigation }) {
           contentContainerStyle={{ paddingVertical: 16, paddingHorizontal: 16 }}
           showsVerticalScrollIndicator={false}
         >
+          {/* Date divider */}
+          <View style={styles.dateDivider}>
+            <View style={[styles.dateLine, { backgroundColor: theme.border }]} />
+            <Text style={[styles.dateText, { color: theme.textMuted }]}>HÔM NAY</Text>
+            <View style={[styles.dateLine, { backgroundColor: theme.border }]} />
+          </View>
+
           {messages.map((msg, i) => (
-            <View key={i} style={[styles.msgRow, msg.role === 'user' && styles.msgRowUser]}>
+            <View key={i}>
               {msg.role === 'assistant' && (
-                <View style={[styles.aiAvatar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                  <Text style={{ fontSize: 16 }}>🤖</Text>
-                </View>
+                <Text style={[styles.senderLabel, { color: theme.textMuted }]}>Gia sư AI</Text>
               )}
-              <View style={[styles.bubble, msg.role === 'user' ? [styles.userBubble, { backgroundColor: theme.primary }] : [styles.aiBubble, { backgroundColor: theme.surface, borderColor: theme.border }]]}>
-                {msg.image && (
-                  <Image source={{ uri: msg.image }} style={styles.chatImage} resizeMode="cover" />
-                )}
-                {msg.role === 'assistant' ? (
-                  <MessageFormatter text={msg.content} />
-                ) : (
-                  <Text style={[styles.userText, { color: '#FFF' }]}>{msg.content}</Text>
-                )}
+              {msg.role === 'user' && (
+                <Text style={[styles.senderLabelUser, { color: theme.textMuted }]}>Bạn</Text>
+              )}
+              <View style={[styles.msgRow, msg.role === 'user' && styles.msgRowUser]}>
+                <View style={[
+                  styles.bubble,
+                  msg.role === 'user'
+                    ? [styles.userBubble, { backgroundColor: theme.chatUserBubble }]
+                    : [styles.aiBubble, { backgroundColor: theme.chatAiBubble }]
+                ]}>
+                  {msg.image && (
+                    <Image source={{ uri: msg.image }} style={styles.chatImage} resizeMode="cover" />
+                  )}
+                  {msg.role === 'assistant' ? (
+                    <MessageFormatter text={msg.content} />
+                  ) : (
+                    <Text style={[styles.userText, { color: '#FFF' }]}>{msg.content}</Text>
+                  )}
+                </View>
               </View>
             </View>
           ))}
 
           {loading && (
-            <View style={[styles.msgRow]}>
-              <View style={[styles.aiAvatar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                <Text style={{ fontSize: 16 }}>🤖</Text>
-              </View>
-              <View style={[styles.aiBubble, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                <View style={styles.typingRow}>
-                  <ActivityIndicator size="small" color={theme.primary} />
-                  <Text style={[styles.typingText, { color: theme.textSecondary }]}>Đang suy nghĩ...</Text>
+            <View>
+              <Text style={[styles.senderLabel, { color: theme.textMuted }]}>Gia sư AI</Text>
+              <View style={[styles.msgRow]}>
+                <View style={[styles.aiBubble, { backgroundColor: theme.chatAiBubble }]}>
+                  <View style={styles.typingRow}>
+                    <ActivityIndicator size="small" color={theme.primary} />
+                    <Text style={[styles.typingText, { color: theme.textSecondary }]}>Đang suy nghĩ...</Text>
+                  </View>
                 </View>
               </View>
+            </View>
+          )}
+
+          {/* Quick Reply Buttons */}
+          {showQuickReplies && (
+            <View style={styles.quickReplies}>
+              <TouchableOpacity
+                style={[styles.quickReplyBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
+                onPress={() => sendQuickMessage('Chụp ảnh bài tập')}
+              >
+                <Text style={[styles.quickReplyText, { color: theme.text }]}>📷 Chụp ảnh bài tập</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.quickReplyBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
+                onPress={() => sendQuickMessage('Nhập đề bài')}
+              >
+                <Text style={[styles.quickReplyText, { color: theme.text }]}>📝 Nhập đề bài</Text>
+              </TouchableOpacity>
             </View>
           )}
         </ScrollView>
@@ -184,13 +224,13 @@ export default function ChatScreen({ navigation }) {
         )}
 
         {/* Input Bar */}
-        <View style={[styles.inputBar, { backgroundColor: theme.background, borderTopColor: theme.border }]}>
-          <TouchableOpacity onPress={showImageOptions} style={[styles.imageBtn, { backgroundColor: theme.surface, borderColor: theme.border }]} disabled={loading}>
-            <Text style={styles.imageBtnIcon}>📷</Text>
+        <View style={[styles.inputBar, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
+          <TouchableOpacity onPress={showImageOptions} style={[styles.addBtn, { backgroundColor: theme.surfaceAlt }]} disabled={loading}>
+            <Text style={styles.addBtnIcon}>+</Text>
           </TouchableOpacity>
           <TextInput
-            style={[styles.chatInput, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-            placeholder="Nhập câu hỏi của bạn..."
+            style={[styles.chatInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+            placeholder="Hỏi tôi bất cứ điều gì..."
             placeholderTextColor={theme.textMuted}
             value={message}
             onChangeText={setMessage}
@@ -203,14 +243,14 @@ export default function ChatScreen({ navigation }) {
             disabled={loading || (!message.trim() && !selectedImage)}
             style={[styles.sendBtn, { backgroundColor: theme.primary }, (!message.trim() && !selectedImage || loading) && { opacity: 0.4 }]}
           >
-            <Text style={styles.sendIcon}>📤</Text>
+            <Text style={styles.sendIcon}>➤</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.navigate('VoiceChat')}
-            style={[styles.voiceBtn, { backgroundColor: theme.accent }]}
+            style={[styles.voiceBtn, { backgroundColor: theme.primary + '20' }]}
             disabled={loading}
           >
-            <Text style={styles.sendIcon}>🎙️</Text>
+            <Text style={styles.voiceBtnIcon}>🎙️</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -221,50 +261,55 @@ export default function ChatScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
 
-  // Header
   header: {
-    paddingHorizontal: 20, paddingTop: 56, paddingBottom: 14, borderBottomWidth: 1,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingTop: 52, paddingBottom: 14, borderBottomWidth: 1,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04, shadowRadius: 4, elevation: 2,
   },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  avatarContainer: {
-    width: 42, height: 42, borderRadius: 21,
-    justifyContent: 'center', alignItems: 'center', borderWidth: 1,
-  },
-  avatarText: { fontSize: 20 },
-  headerTitle: { fontSize: 20, fontWeight: '800' },
+  backBtn: { padding: 6 },
+  backIcon: { fontSize: 22, fontWeight: '600' },
+  headerCenter: { alignItems: 'center', flex: 1 },
+  headerTitle: { fontSize: 18, fontWeight: '800' },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 },
-  statusDot: { width: 8, height: 8, borderRadius: 4 },
+  statusDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#2ED573' },
   headerSub: { fontSize: 12 },
+  menuBtn: { padding: 6 },
+  menuIcon: { fontSize: 22, fontWeight: '800' },
 
-  // Chat area
   chatArea: { flex: 1 },
-  msgRow: { flexDirection: 'row', marginBottom: 16, alignItems: 'flex-start' },
-  msgRowUser: { justifyContent: 'flex-end' },
-  aiAvatar: {
-    width: 30, height: 30, borderRadius: 15,
-    justifyContent: 'center', alignItems: 'center', marginRight: 8, marginTop: 4,
-    borderWidth: 1,
-  },
 
-  // Bubbles
-  bubble: { maxWidth: '80%', borderRadius: 18, padding: 14 },
-  userBubble: { borderBottomRightRadius: 4, marginLeft: 'auto' },
-  aiBubble: { borderBottomLeftRadius: 4, borderWidth: 1 },
+  dateDivider: { flexDirection: 'row', alignItems: 'center', marginVertical: 12, gap: 10 },
+  dateLine: { flex: 1, height: 1 },
+  dateText: { fontSize: 11, fontWeight: '700', letterSpacing: 1 },
+
+  senderLabel: { fontSize: 11, fontWeight: '600', marginBottom: 4, marginTop: 8 },
+  senderLabelUser: { fontSize: 11, fontWeight: '600', marginBottom: 4, marginTop: 8, textAlign: 'right' },
+
+  msgRow: { flexDirection: 'row', marginBottom: 6, alignItems: 'flex-start' },
+  msgRowUser: { justifyContent: 'flex-end' },
+
+  bubble: { maxWidth: '82%', borderRadius: 20, padding: 14 },
+  userBubble: { borderBottomRightRadius: 6, marginLeft: 'auto' },
+  aiBubble: { borderBottomLeftRadius: 6 },
   userText: { fontSize: 15, lineHeight: 22 },
 
-  // Chat image
-  chatImage: { width: 200, height: 150, borderRadius: 12, marginBottom: 8 },
+  chatImage: { width: 200, height: 150, borderRadius: 14, marginBottom: 8 },
 
-  // Typing
   typingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   typingText: { fontSize: 13 },
 
-  // Image preview
+  quickReplies: { flexDirection: 'row', gap: 10, marginTop: 12, flexWrap: 'wrap' },
+  quickReplyBtn: {
+    paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, borderWidth: 1,
+  },
+  quickReplyText: { fontSize: 13, fontWeight: '600' },
+
   previewBar: {
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10,
     borderTopWidth: 1, gap: 12,
   },
-  previewImage: { width: 50, height: 50, borderRadius: 10 },
+  previewImage: { width: 50, height: 50, borderRadius: 12 },
   previewInfo: { flex: 1 },
   previewLabel: { fontSize: 13, fontWeight: '600' },
   previewHint: { fontSize: 11, marginTop: 2 },
@@ -274,27 +319,27 @@ const styles = StyleSheet.create({
   },
   removeText: { fontWeight: '800', fontSize: 14 },
 
-  // Input bar
   inputBar: {
     flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12,
     paddingVertical: 10, borderTopWidth: 1,
   },
-  imageBtn: {
-    width: 44, height: 44, borderRadius: 22,
-    justifyContent: 'center', alignItems: 'center', marginRight: 8, borderWidth: 1,
+  addBtn: {
+    width: 38, height: 38, borderRadius: 19,
+    justifyContent: 'center', alignItems: 'center', marginRight: 8,
   },
-  imageBtnIcon: { fontSize: 18 },
+  addBtnIcon: { fontSize: 22, fontWeight: '300', color: '#888' },
   chatInput: {
     flex: 1, borderRadius: 20, paddingHorizontal: 16,
-    paddingVertical: 10, fontSize: 15, maxHeight: 100, borderWidth: 1,
+    paddingVertical: 10, fontSize: 14, maxHeight: 100, borderWidth: 1,
   },
   sendBtn: {
-    width: 44, height: 44, borderRadius: 22,
+    width: 38, height: 38, borderRadius: 19,
     justifyContent: 'center', alignItems: 'center', marginLeft: 8,
   },
-  sendIcon: { fontSize: 18 },
+  sendIcon: { fontSize: 16, color: '#FFF' },
   voiceBtn: {
-    width: 44, height: 44, borderRadius: 22,
+    width: 38, height: 38, borderRadius: 19,
     justifyContent: 'center', alignItems: 'center', marginLeft: 6,
   },
+  voiceBtnIcon: { fontSize: 16 },
 });

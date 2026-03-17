@@ -93,7 +93,7 @@ export default function RegisterScreen({ navigation }) {
             </View>
 
             <TouchableOpacity onPress={handleRegister} disabled={loading} activeOpacity={0.8}>
-              <LinearGradient colors={['#6C63FF', '#4834DF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.button}>
+              <LinearGradient colors={[theme.primary, theme.primaryDark]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.button}>
                 {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Tạo tài khoản</Text>}
               </LinearGradient>
             </TouchableOpacity>

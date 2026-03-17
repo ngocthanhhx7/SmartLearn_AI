@@ -1,63 +1,77 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// ─── Kokonut UI Design System ─── //
-// Translated faithfully from Kokonut's Zinc-based palette
 const THEMES = {
+  light: {
+    background: '#F5F5F8',
+    surface: '#FFFFFF',
+    surfaceAlt: '#F0F0F4',
+    border: '#E8E8EE',
+    borderLight: '#F0F0F4',
+    text: '#1A1A2E',
+    textSecondary: '#5A5A72',
+    textMuted: '#9A9AB0',
+    primary: '#F26B3A',
+    primaryLight: '#F26B3A18',
+    primaryDark: '#E85D2C',
+    accent: '#4A6BF5',
+    accentLight: '#4A6BF518',
+    destructive: '#EF4444',
+    destructiveLight: '#EF444418',
+    warning: '#F59E0B',
+    card: '#FFFFFF',
+    shadow: 'rgba(0,0,0,0.06)',
+    headerGradientStart: '#F26B3A',
+    headerGradientEnd: '#E85D2C',
+    cardGradientStart: '#F26B3A',
+    cardGradientEnd: '#F7954A',
+    chatUserBubble: '#F26B3A',
+    chatAiBubble: '#F0F0F4',
+    tabBarBg: '#FFFFFF',
+    isDark: false,
+  },
   dark: {
-    background: '#09090B',       // zinc-950
-    surface: '#18181B',          // zinc-900
-    surfaceAlt: '#27272A',       // zinc-800
-    border: '#3F3F46',           // zinc-700
-    borderLight: '#27272A',      // zinc-800
-    text: '#FAFAFA',             // zinc-50
-    textSecondary: '#A1A1AA',    // zinc-400
-    textMuted: '#71717A',        // zinc-500
-    primary: '#6C63FF',          // brand purple
-    primaryLight: '#6C63FF20',
-    accent: '#2ED573',
-    accentLight: '#2ED57322',
+    background: '#0F0F1A',
+    surface: '#1A1A2E',
+    surfaceAlt: '#25253A',
+    border: '#2F2F45',
+    borderLight: '#25253A',
+    text: '#F5F5F8',
+    textSecondary: '#A0A0B8',
+    textMuted: '#6A6A82',
+    primary: '#F26B3A',
+    primaryLight: '#F26B3A22',
+    primaryDark: '#E85D2C',
+    accent: '#6C8AFF',
+    accentLight: '#6C8AFF22',
     destructive: '#EF4444',
     destructiveLight: '#EF444422',
     warning: '#F59E0B',
-    card: '#18181B',
-    shadow: 'rgba(0,0,0,0.5)',
+    card: '#1A1A2E',
+    shadow: 'rgba(0,0,0,0.4)',
+    headerGradientStart: '#F26B3A',
+    headerGradientEnd: '#D14E20',
+    cardGradientStart: '#F26B3A',
+    cardGradientEnd: '#D14E20',
+    chatUserBubble: '#F26B3A',
+    chatAiBubble: '#25253A',
+    tabBarBg: '#1A1A2E',
     isDark: true,
-  },
-  light: {
-    background: '#FAFAFA',       // zinc-50
-    surface: '#FFFFFF',          // white
-    surfaceAlt: '#F4F4F5',       // zinc-100
-    border: '#E4E4E7',           // zinc-200
-    borderLight: '#E4E4E7',      // zinc-200
-    text: '#09090B',             // zinc-950
-    textSecondary: '#52525B',    // zinc-600
-    textMuted: '#A1A1AA',        // zinc-400
-    primary: '#5B53F5',          // brand purple darkened for contrast
-    primaryLight: '#5B53F520',
-    accent: '#16A34A',           // darker green for readability
-    accentLight: '#16A34A22',
-    destructive: '#DC2626',
-    destructiveLight: '#DC262622',
-    warning: '#D97706',
-    card: '#FFFFFF',
-    shadow: 'rgba(0,0,0,0.08)',
-    isDark: false,
   },
 };
 
 const ThemeContext = createContext({
-  theme: THEMES.dark,
-  isDark: true,
+  theme: THEMES.light,
+  isDark: false,
   toggleTheme: () => {},
 });
 
 export const ThemeProvider = ({ children }) => {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem('app_theme').then((saved) => {
-      if (saved === 'light') setIsDark(false);
+      if (saved === 'dark') setIsDark(true);
     });
   }, []);
 

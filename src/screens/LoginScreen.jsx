@@ -63,7 +63,7 @@ export default function LoginScreen({ navigation }) {
 
           <TouchableOpacity onPress={handleLogin} disabled={loading} activeOpacity={0.8}>
             <LinearGradient
-              colors={['#6C63FF', '#4834DF']}
+              colors={[theme.primary, theme.primaryDark]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.button}

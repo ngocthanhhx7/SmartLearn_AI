@@ -91,7 +91,7 @@ export default function RoadmapDetailScreen({ navigation, route }) {
                 })}
                 activeOpacity={0.8}
               >
-                <LinearGradient colors={['#6C63FF', '#4834DF']} style={styles.quizBtn}>
+                <LinearGradient colors={[theme.primary, theme.primaryDark]} style={styles.quizBtn}>
                   <Text style={styles.quizBtnText}>📝 Tạo bài kiểm tra kiến thức phần này</Text>
                 </LinearGradient>
               </TouchableOpacity>

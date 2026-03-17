@@ -91,7 +91,7 @@ export default function AnalyticsScreen() {
           <Text style={[styles.headerSub, { color: theme.textSecondary }]}>Theo dõi tiến độ và hiệu suất học tập</Text>
         </View>
 
-        <LinearGradient colors={['#6C63FF', '#4834DF']} style={styles.statsCard}>
+        <LinearGradient colors={[theme.primary, theme.primaryDark]} style={styles.statsCard}>
           <View style={styles.statsGrid}>
             <View style={styles.statBox}>
               <Text style={styles.statNum}>{data?.totalStudyTime || 0}</Text>

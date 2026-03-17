@@ -148,7 +148,7 @@ export default function ReminderScreen({ navigation }) {
 
       {enabled && (
         <TouchableOpacity onPress={scheduleReminder} activeOpacity={0.8} style={{ paddingHorizontal: 20 }}>
-          <LinearGradient colors={['#6C63FF', '#4834DF']} style={styles.saveBtn}>
+          <LinearGradient colors={[theme.primary, theme.primaryDark]} style={styles.saveBtn}>
             <Text style={styles.saveBtnText}>💾 Lưu nhắc nhở</Text>
           </LinearGradient>
         </TouchableOpacity>

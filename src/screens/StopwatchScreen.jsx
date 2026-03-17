@@ -153,7 +153,7 @@ export default function StopwatchScreen({ navigation }) {
         style={{ paddingHorizontal: 20, marginTop: 12 }}
       >
         <LinearGradient
-          colors={canSave && !saving ? ['#6C63FF', '#4834DF'] : [theme.border, theme.border]}
+          colors={canSave && !saving ? [theme.primary, theme.primaryDark] : [theme.border, theme.border]}
           style={styles.saveBtn}
         >
           <Text style={[styles.saveBtnText, !canSave && { color: theme.textMuted }]}>

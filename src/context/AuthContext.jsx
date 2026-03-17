@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { loginUser, registerUser } from '../services/api';
+import { loginUser, registerUser, updateProfile } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -48,6 +48,14 @@ export function AuthProvider({ children }) {
     return userData;
   };
 
+  const updateUser = async (data) => {
+    const res = await updateProfile(data);
+    const updatedUser = res.data.user;
+    await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    return updatedUser;
+  };
+
   const logout = async () => {
     await AsyncStorage.multiRemove(['token', 'user']);
     setToken(null);
@@ -55,7 +63,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, updateUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

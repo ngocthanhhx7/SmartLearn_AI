@@ -65,7 +65,7 @@ export default function ChangePasswordScreen({ navigation }) {
         </View>
 
         <TouchableOpacity onPress={handleChange} disabled={loading} activeOpacity={0.8}>
-          <LinearGradient colors={['#6C63FF', '#4834DF']} style={styles.submitBtn}>
+          <LinearGradient colors={[theme.primary, theme.primaryDark]} style={styles.submitBtn}>
             {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.submitBtnText}>Xác nhận đổi</Text>}
           </LinearGradient>
         </TouchableOpacity>
