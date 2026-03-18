@@ -43,10 +43,10 @@ export default function RegisterScreen({ navigation }) {
   const { theme } = useTheme();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId: GOOGLE_EXPO_CLIENT_ID,
-    webClientId: GOOGLE_WEB_CLIENT_ID,
-    iosClientId: GOOGLE_IOS_CLIENT_ID,
-    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+    expoClientId: GOOGLE_EXPO_CLIENT_ID || 'unconfigured-expo-client-id',
+    webClientId: GOOGLE_WEB_CLIENT_ID || 'unconfigured-web-client-id',
+    iosClientId: GOOGLE_IOS_CLIENT_ID || 'unconfigured-ios-client-id',
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID || 'unconfigured-android-client-id',
     scopes: ['profile', 'email'],
   });
 

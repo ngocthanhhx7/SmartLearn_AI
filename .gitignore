@@ -47,3 +47,6 @@ server/
 
 # local copilot agent metadata
 .agent/
+
+# local client
+client_secret_299962616218-75ac1bfrqacan584hkinl611qa6ail96.apps.googleusercontent.com
