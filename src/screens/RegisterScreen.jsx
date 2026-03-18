@@ -6,12 +6,25 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
+import Constants from 'expo-constants';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
 WebBrowser.maybeCompleteAuthSession();
 
-const GOOGLE_WEB_CLIENT_ID = '299962616218-75ac1bfrqacan584hkinl611qa6ail96.apps.googleusercontent.com';
+const googleAuthConfig = Constants.expoConfig?.extra?.googleAuth || {};
+const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
+  || googleAuthConfig.webClientId
+  || '';
+const GOOGLE_EXPO_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID
+  || googleAuthConfig.expoClientId
+  || '';
+const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
+  || googleAuthConfig.iosClientId
+  || undefined;
+const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID
+  || googleAuthConfig.androidClientId
+  || undefined;
 
 const LEVELS = [
   { key: 'beginner', label: 'Cơ bản' },
@@ -30,15 +43,22 @@ export default function RegisterScreen({ navigation }) {
   const { theme } = useTheme();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
+    expoClientId: GOOGLE_EXPO_CLIENT_ID,
     webClientId: GOOGLE_WEB_CLIENT_ID,
-    iosClientId: '299962616218-placeholder-ios.apps.googleusercontent.com',
-    androidClientId: '299962616218-placeholder-android.apps.googleusercontent.com',
+    iosClientId: GOOGLE_IOS_CLIENT_ID,
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
     scopes: ['profile', 'email'],
   });
 
   useEffect(() => {
     if (response?.type === 'success') {
       handleGoogleResponse(response.authentication);
+      return;
+    }
+
+    if (response?.type === 'error') {
+      const message = response.error?.message || 'Không thể xác thực với Google.';
+      Alert.alert('Google Login lỗi', message);
     }
   }, [response]);
 
@@ -83,6 +103,27 @@ export default function RegisterScreen({ navigation }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGooglePress = async () => {
+    const isExpoGo = Constants.appOwnership === 'expo';
+
+    if (isExpoGo && !GOOGLE_EXPO_CLIENT_ID) {
+      Alert.alert('Thiếu cấu hình', 'Thiếu EXPO Google Client ID cho Expo Go.');
+      return;
+    }
+
+    if (!isExpoGo && Platform.OS === 'android' && !GOOGLE_ANDROID_CLIENT_ID) {
+      Alert.alert('Thiếu cấu hình', 'Thiếu Android Google Client ID cho bản build Android.');
+      return;
+    }
+
+    if (!isExpoGo && Platform.OS === 'ios' && !GOOGLE_IOS_CLIENT_ID) {
+      Alert.alert('Thiếu cấu hình', 'Thiếu iOS Google Client ID cho bản build iOS.');
+      return;
+    }
+
+    await promptAsync();
   };
 
   return (
@@ -151,7 +192,7 @@ export default function RegisterScreen({ navigation }) {
             {/* Google Button */}
             <TouchableOpacity
               style={[styles.googleBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
-              onPress={() => promptAsync()}
+              onPress={handleGooglePress}
               disabled={!request || googleLoading}
               activeOpacity={0.8}
             >

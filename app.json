@@ -32,6 +32,12 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
+      "googleAuth": {
+        "webClientId": "",
+        "expoClientId": "",
+        "iosClientId": "",
+        "androidClientId": ""
+      },
       "eas": {
         "projectId": "b7ce46aa-0ef6-4449-80ab-499896eabcdc"
       }
