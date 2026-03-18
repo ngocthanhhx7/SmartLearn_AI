@@ -47,7 +47,7 @@ Mở ứng dụng Camera hoặc trình quét mã QR trên điện thoại Androi
 
 ### 2. Truy cập Link trực tiếp
 Bấm vào link bên dưới để tới trang cài đặt Build của Expo:
-👉 [**Tải SmartLearn AI Build Preview**](https://expo.dev/accounts/ngocthanhhx7/projects/SmartLearn_AI/builds/dd31a674-6134-4423-88db-f1bbae40f4fe)
+👉 [**Tải SmartLearn AI Build Preview**](https://expo.dev/accounts/ngocthanhhx7/projects/SmartLearn_AI/builds/49cee254-4448-4453-86dd-2cd8c1a3b7f1)
 
 ---
 
