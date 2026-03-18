@@ -31,6 +31,8 @@ export default function RegisterScreen({ navigation }) {
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: GOOGLE_WEB_CLIENT_ID,
+    iosClientId: '299962616218-placeholder-ios.apps.googleusercontent.com',
+    androidClientId: '299962616218-placeholder-android.apps.googleusercontent.com',
     scopes: ['profile', 'email'],
   });
 
