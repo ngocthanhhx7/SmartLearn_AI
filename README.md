@@ -1,7 +1,7 @@
-# SmartLearn AI 🚀
+# Mentora 🚀
 **Trợ lý học tập thông minh nền tảng AI - Đồng hành cùng học sinh, sinh viên Việt Nam**
 
-SmartLearn AI là một ứng dụng di động được xây dựng trên nền tảng React Native và Expo, tích hợp trí tuệ nhân tạo (Google Gemini) để cung cấp giải pháp học tập cá nhân hóa, hiệu quả và hiện đại.
+Mentora là một ứng dụng di động được xây dựng trên nền tảng React Native và Expo, tích hợp trí tuệ nhân tạo (Google Gemini) để cung cấp giải pháp học tập cá nhân hóa, hiệu quả và hiện đại.
 
 ---
 
@@ -43,11 +43,11 @@ Bạn có thể tải và cài đặt bản Preview (Android) của ứng dụng
 ### 1. Quét mã QR
 Mở ứng dụng Camera hoặc trình quét mã QR trên điện thoại Android của bạn để quét mã dưới đây:
 
-![SmartLearn AI QR Code](./assets/qr_code.png)
+![Mentora QR Code](./assets/qr_code.png)
 
 ### 2. Truy cập Link trực tiếp
 Bấm vào link bên dưới để tới trang cài đặt Build của Expo:
-👉 [**Tải SmartLearn AI Build Preview**](https://expo.dev/accounts/ngocthanhhx7/projects/SmartLearn_AI/builds/49cee254-4448-4453-86dd-2cd8c1a3b7f1)
+👉 [**Tải Mentora Build Preview**](https://expo.dev/accounts/ngocthanhhx7/projects/SmartLearn_AI/builds/49cee254-4448-4453-86dd-2cd8c1a3b7f1)
 
 ---
 
@@ -56,4 +56,4 @@ Bấm vào link bên dưới để tới trang cài đặt Build của Expo:
 - Đảm bảo điện thoại của bạn cho phép cài đặt ứng dụng từ nguồn không xác định hoặc thông qua Expo.
 
 ---
-*Phát triển bởi SmartLearn Team ❤️*
+*Phát triển bởi Mentora Team ❤️*

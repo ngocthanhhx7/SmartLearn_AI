@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "SmartLearn AI",
-    "slug": "SmartLearn_AI",
-    "scheme": "smartlearnai",
+    "name": "Mentora",
+    "slug": "mentora",
+    "scheme": "mentora",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

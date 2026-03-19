@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://smartlearn-backend-qxm7.onrender.com/api';
 const WS_BASE = API_URL.replace(/^https?/, 'wss').replace(/\/api$/, '');
-const IDLE_AI_TEXT = 'Nhấn nút micro bên dưới để bắt đầu trò chuyện hoặc đặt câu hỏi cho Gia sư AI của Smartlearn.';
+const IDLE_AI_TEXT = 'Nhấn nút micro bên dưới để bắt đầu trò chuyện hoặc đặt câu hỏi cho Gia sư AI của Mentora.';
 
 const RECORDING_OPTIONS = {
   android: {
@@ -346,7 +346,7 @@ export default function VoiceChatScreen({ navigation }) {
         <Text style={[styles.hintText, { color: theme.text }]}>
           {status === 'idle' && !isConnected ? 'Nhấn để kết nối & bắt đầu' : 'Nhấn để nói / dừng'}
         </Text>
-        <Text style={[styles.branding, { color: theme.textMuted }]}>SMARTLEARN AI TUTOR</Text>
+        <Text style={[styles.branding, { color: theme.textMuted }]}>MENTORA AI TUTOR</Text>
       </View>
     </View>
   );

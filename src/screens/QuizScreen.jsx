@@ -10,6 +10,22 @@ import { useTheme } from '../context/ThemeContext';
 export default function QuizScreen({ route, navigation }) {
   const { theme, isDark } = useTheme();
   const [topic, setTopic] = useState('');
+  const [formatCounts, setFormatCounts] = useState({
+    multiple_choice: 5,
+    true_false: 3,
+    short_answer: 2,
+  });
+
+  const updateFormatCount = (type, delta) => {
+    setFormatCounts((prev) => {
+      const current = prev[type];
+      const next = current + delta;
+      // Tránh âm và giới hạn tối đa tổng thể có thể tránh AI timeout nếu số quá lớn,
+      // ở đây ta chặn min = 0, max = 15.
+      if (next < 0 || next > 15) return prev;
+      return { ...prev, [type]: next };
+    });
+  };
 
   React.useEffect(() => {
     if (route?.params?.initialTopic) {
@@ -26,6 +42,9 @@ export default function QuizScreen({ route, navigation }) {
 
   const handleGenerate = async () => {
     if (!topic.trim()) return Alert.alert('Lỗi', 'Vui lòng nhập chủ đề');
+    const total = formatCounts.multiple_choice + formatCounts.true_false + formatCounts.short_answer;
+    if (total === 0) return Alert.alert('Lỗi', 'Vui lòng chọn ít nhất 1 câu hỏi');
+    
     setLoading(true);
     setQuestions(null);
     setCurrentQ(0);
@@ -33,7 +52,7 @@ export default function QuizScreen({ route, navigation }) {
     setShowResults(false);
     setScore(null);
     try {
-      const res = await generateQuiz(topic.trim());
+      const res = await generateQuiz(topic.trim(), formatCounts);
       setQuestions(res.data.questions);
     } catch (err) {
       Alert.alert('Lỗi', err.response?.data?.error || 'Không thể tạo câu hỏi kiểm tra');
@@ -267,7 +286,15 @@ export default function QuizScreen({ route, navigation }) {
                 <Text style={[styles.formatName, { color: theme.text }]}>Trắc nghiệm</Text>
                 <Text style={[styles.formatDesc, { color: theme.textMuted }]}>Nhiều lựa chọn (A, B, C, D)</Text>
               </View>
-              <Text style={{ fontSize: 16 }}>📋</Text>
+              <View style={styles.quantityControls}>
+                <TouchableOpacity onPress={() => updateFormatCount('multiple_choice', -1)} style={[styles.quantityBtn, { backgroundColor: theme.surfaceAlt }]}>
+                  <Text style={[styles.quantityBtnText, { color: theme.text }]}>-</Text>
+                </TouchableOpacity>
+                <Text style={[styles.quantityText, { color: theme.text }]}>{formatCounts.multiple_choice}</Text>
+                <TouchableOpacity onPress={() => updateFormatCount('multiple_choice', 1)} style={[styles.quantityBtn, { backgroundColor: theme.primaryLight }]}>
+                  <Text style={[styles.quantityBtnText, { color: theme.primary }]}>+</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={[styles.formatDivider, { backgroundColor: theme.border }]} />
@@ -280,7 +307,15 @@ export default function QuizScreen({ route, navigation }) {
                 <Text style={[styles.formatName, { color: theme.text }]}>Đúng / Sai</Text>
                 <Text style={[styles.formatDesc, { color: theme.textMuted }]}>Kiểm tra kiến thức cốt lõi</Text>
               </View>
-              <Text style={{ fontSize: 16 }}>✅</Text>
+              <View style={styles.quantityControls}>
+                <TouchableOpacity onPress={() => updateFormatCount('true_false', -1)} style={[styles.quantityBtn, { backgroundColor: theme.surfaceAlt }]}>
+                  <Text style={[styles.quantityBtnText, { color: theme.text }]}>-</Text>
+                </TouchableOpacity>
+                <Text style={[styles.quantityText, { color: theme.text }]}>{formatCounts.true_false}</Text>
+                <TouchableOpacity onPress={() => updateFormatCount('true_false', 1)} style={[styles.quantityBtn, { backgroundColor: theme.primaryLight }]}>
+                  <Text style={[styles.quantityBtnText, { color: theme.primary }]}>+</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={[styles.formatDivider, { backgroundColor: theme.border }]} />
@@ -293,7 +328,15 @@ export default function QuizScreen({ route, navigation }) {
                 <Text style={[styles.formatName, { color: theme.text }]}>Tự luận ngắn</Text>
                 <Text style={[styles.formatDesc, { color: theme.textMuted }]}>Phát triển tư duy phân tích</Text>
               </View>
-              <Text style={{ fontSize: 16 }}>📝</Text>
+              <View style={styles.quantityControls}>
+                <TouchableOpacity onPress={() => updateFormatCount('short_answer', -1)} style={[styles.quantityBtn, { backgroundColor: theme.surfaceAlt }]}>
+                  <Text style={[styles.quantityBtnText, { color: theme.text }]}>-</Text>
+                </TouchableOpacity>
+                <Text style={[styles.quantityText, { color: theme.text }]}>{formatCounts.short_answer}</Text>
+                <TouchableOpacity onPress={() => updateFormatCount('short_answer', 1)} style={[styles.quantityBtn, { backgroundColor: theme.primaryLight }]}>
+                  <Text style={[styles.quantityBtnText, { color: theme.primary }]}>+</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -375,6 +418,11 @@ const styles = StyleSheet.create({
   formatName: { fontSize: 15, fontWeight: '700', marginBottom: 2 },
   formatDesc: { fontSize: 12 },
   formatDivider: { height: 1, marginVertical: 2 },
+
+  quantityControls: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  quantityBtn: { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+  quantityBtnText: { fontSize: 18, fontWeight: '700', lineHeight: 22 },
+  quantityText: { fontSize: 16, fontWeight: '700', minWidth: 20, textAlign: 'center' },
 
   generateSection: { paddingHorizontal: 20, alignItems: 'center' },
   generateBtn: {

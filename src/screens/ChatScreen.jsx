@@ -13,7 +13,7 @@ export default function ChatScreen({ navigation }) {
   const { theme } = useTheme();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Chào bạn! Tôi là Gia sư AI của Smartlearn. Hôm nay bạn muốn ôn tập kiến thức nào hay có câu hỏi gì cần giải đáp không?' },
+    { role: 'assistant', content: 'Chào bạn! Tôi là Gia sư AI của Mentora. Hôm nay bạn muốn ôn tập kiến thức nào hay có câu hỏi gì cần giải đáp không?' },
   ]);
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);

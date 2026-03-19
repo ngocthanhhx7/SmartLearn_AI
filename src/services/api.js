@@ -26,7 +26,7 @@ export const generateLearningPlan = (topic) => api.post('/ai/learning-plan', { t
 export const chatWithAI = (message, history) => api.post('/ai/chat', { message, history });
 export const chatWithImage = (message, imageBase64, mimeType) =>
   api.post('/ai/chat-image', { message, imageBase64, mimeType });
-export const generateQuiz = (topic) => api.post('/ai/generate-quiz', { topic });
+export const generateQuiz = (topic, formatCounts) => api.post('/ai/generate-quiz', { topic, formatCounts });
 export const analyzePerformance = (studyData, quizData) =>
   api.post('/ai/analyze-performance', { studyData, quizData });
 

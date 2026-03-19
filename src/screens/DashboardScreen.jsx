@@ -70,7 +70,7 @@ export default function DashboardScreen({ navigation }) {
             <View style={[styles.logoIcon, { backgroundColor: theme.primary }]}>
               <Image source={require('../../assets/icon.png')} style={styles.logoEmoji} />
             </View>
-            <Text style={[styles.logoText, { color: theme.text }]}>Smartlearn AI</Text>
+            <Text style={[styles.logoText, { color: theme.text }]}>Mentora</Text>
           </View>
           <TouchableOpacity style={[styles.notifBtn, { backgroundColor: theme.surface }]}>
             <Text style={styles.notifIcon}>🔔</Text>

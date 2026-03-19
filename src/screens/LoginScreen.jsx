@@ -115,7 +115,7 @@ export default function LoginScreen({ navigation }) {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.inner}>
         <View style={styles.header}>
           <Image style={styles.logo} source={require('../../assets/icon.png')} />
-          <Text style={[styles.title, { color: theme.text }]}>SmartLearn AI</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Mentora</Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Trợ lý học tập thông minh</Text>
         </View>
 

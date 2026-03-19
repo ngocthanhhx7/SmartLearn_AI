@@ -63,7 +63,7 @@ export default function ReminderScreen({ navigation }) {
     await Notifications.scheduleNotificationAsync({
       content: {
         title: '📚 Đến giờ học rồi!',
-        body: 'Hãy tiếp tục hành trình học tập trên SmartLearn AI nhé!',
+        body: 'Hãy tiếp tục hành trình học tập trên Mentora nhé!',
         sound: true,
       },
       trigger: {
