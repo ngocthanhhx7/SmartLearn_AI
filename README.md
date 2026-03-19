@@ -47,7 +47,7 @@ Mở ứng dụng Camera hoặc trình quét mã QR trên điện thoại Androi
 
 ### 2. Truy cập Link trực tiếp
 Bấm vào link bên dưới để tới trang cài đặt Build của Expo:
-👉 [**Tải Mentora Build Preview**](https://expo.dev/accounts/ngocthanhhx7/projects/SmartLearn_AI/builds/49cee254-4448-4453-86dd-2cd8c1a3b7f1)
+👉 [**Tải Mentora Build Preview**](https://expo.dev/accounts/ngocthanhhx7/projects/mentora/builds/03213ce3-4b66-4e0a-851f-d068f28952c2)
 
 ---
 

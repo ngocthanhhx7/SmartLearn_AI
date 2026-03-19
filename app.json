@@ -26,7 +26,12 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.ngocthanhhx7.smartlearnai"
+      "package": "com.ngocthanhhx7.smartlearnai",
+      "permissions": [
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_SPECIAL_USE",
+        "POST_NOTIFICATIONS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -39,12 +44,11 @@
         "androidClientId": ""
       },
       "eas": {
-        "projectId": "b7ce46aa-0ef6-4449-80ab-499896eabcdc"
+        "projectId": "22b36398-caf9-4198-a027-57903ae88cc8"
       }
     },
     "plugins": [
-      "expo-web-browser",
-      "@notifee/react-native"
+      "expo-web-browser"
     ]
   }
 }

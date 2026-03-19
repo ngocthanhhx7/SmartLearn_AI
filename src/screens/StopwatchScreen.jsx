@@ -1,9 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, TextInput, Alert, AppState } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Notifications from 'expo-notifications';
-import notifee, { AndroidImportance } from '@notifee/react-native';
 import { useTheme } from '../context/ThemeContext';
 import { createStudySession } from '../services/api';
+
+let notifee = null;
+let AndroidImportance = null;
+try {
+  const notifeeModule = require('@notifee/react-native');
+  notifee = notifeeModule.default;
+  AndroidImportance = notifeeModule.AndroidImportance;
+} catch (err) {
+  console.warn('Notifee native module not found.');
+}
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -52,29 +62,39 @@ export default function StopwatchScreen({ navigation }) {
   }, [isRunning, time, mode]);
 
   const startForegroundService = async () => {
-    const channelId = await notifee.createChannel({
-      id: 'timer',
-      name: 'Stopwatch Timer',
-      importance: AndroidImportance.DEFAULT,
-    });
+    if (!notifee) return;
+    try {
+      const channelId = await notifee.createChannel({
+        id: 'timer',
+        name: 'Stopwatch Timer',
+        importance: AndroidImportance.DEFAULT,
+      });
 
-    await notifee.displayNotification({
-      id: 'timer_notification',
-      title: mode === 'stopwatch' ? '⏱ Đồng hồ bấm giờ' : '🍅 Pomodoro (25\')',
-      body: 'Thời gian đang chạy...',
-      android: {
-        channelId,
-        asForegroundService: true,
-        ongoing: true,
-        usesChronometer: true,
-        chronometerDirection: mode === 'stopwatch' ? 'up' : 'down',
-        when: expectedTimeRef.current,
-      },
-    });
+      await notifee.displayNotification({
+        id: 'timer_notification',
+        title: mode === 'stopwatch' ? '⏱ Đồng hồ bấm giờ' : '🍅 Pomodoro (25\')',
+        body: 'Thời gian đang chạy...',
+        android: {
+          channelId,
+          asForegroundService: true,
+          ongoing: true,
+          usesChronometer: true,
+          chronometerDirection: mode === 'stopwatch' ? 'up' : 'down',
+          when: expectedTimeRef.current,
+        },
+      });
+    } catch (err) {
+      console.warn('Notifee display failed:', err);
+    }
   };
 
   const stopForegroundService = async () => {
-    await notifee.stopForegroundService();
+    if (!notifee) return;
+    try {
+      await notifee.stopForegroundService();
+    } catch (err) {
+      console.warn('Notifee stop failed:', err);
+    }
   };
 
   useEffect(() => {
@@ -100,14 +120,16 @@ export default function StopwatchScreen({ navigation }) {
             setIsRunning(false);
             setTime(0);
             
-            notifee.displayNotification({
-              title: '🍅 Pomodoro hoàn thành!',
-              body: 'Đã hết 25 phút, bạn làm tốt lắm!',
-              android: {
-                channelId: 'timer',
-                importance: AndroidImportance.HIGH,
-              }
-            });
+            if (notifee) {
+              notifee.displayNotification({
+                title: '🍅 Pomodoro hoàn thành!',
+                body: 'Đã hết 25 phút, bạn làm tốt lắm!',
+                android: {
+                  channelId: 'timer',
+                  importance: AndroidImportance.HIGH,
+                }
+              });
+            }
           } else {
             setTime(newTime);
           }
