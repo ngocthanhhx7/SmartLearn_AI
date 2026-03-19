@@ -53,7 +53,7 @@ export default function LearningScreen({ navigation }) {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={[styles.logoIcon, { backgroundColor: theme.primary }]}>
-              <Image source={require('../../assets/icon.png')} style={styles.logoEmoji} />
+              <Image source={require('../../assets/logo.png')} style={styles.logoEmoji} />
             </View>
             <Text style={[styles.logoText, { color: theme.text }]}>Mentora</Text>
           </View>

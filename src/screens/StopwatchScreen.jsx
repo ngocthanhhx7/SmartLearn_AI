@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, TextInput, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Notifications from 'expo-notifications';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 import { useTheme } from '../context/ThemeContext';
 import { createStudySession } from '../services/api';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function StopwatchScreen({ navigation }) {
   const { theme, isDark } = useTheme();
@@ -15,20 +24,94 @@ export default function StopwatchScreen({ navigation }) {
 
   const timerRef = useRef(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const expectedTimeRef = useRef(null);
+  const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    Notifications.requestPermissionsAsync();
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        Notifications.cancelAllScheduledNotificationsAsync();
+      } else if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
+        if (isRunning && mode === 'pomodoro' && time > 0) {
+          Notifications.scheduleNotificationAsync({
+            content: { title: 'Pomodoro hoàn thành! 🍅', body: 'Đã hết 25 phút, bạn làm tốt lắm!' },
+            trigger: { seconds: time },
+          });
+        }
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [isRunning, time, mode]);
+
+  const startForegroundService = async () => {
+    const channelId = await notifee.createChannel({
+      id: 'timer',
+      name: 'Stopwatch Timer',
+      importance: AndroidImportance.DEFAULT,
+    });
+
+    await notifee.displayNotification({
+      id: 'timer_notification',
+      title: mode === 'stopwatch' ? '⏱ Đồng hồ bấm giờ' : '🍅 Pomodoro (25\')',
+      body: 'Thời gian đang chạy...',
+      android: {
+        channelId,
+        asForegroundService: true,
+        ongoing: true,
+        usesChronometer: true,
+        chronometerDirection: mode === 'stopwatch' ? 'up' : 'down',
+        when: expectedTimeRef.current,
+      },
+    });
+  };
+
+  const stopForegroundService = async () => {
+    await notifee.stopForegroundService();
+  };
 
   useEffect(() => {
     if (isRunning) {
+      if (!expectedTimeRef.current) {
+        if (mode === 'stopwatch') {
+          expectedTimeRef.current = Date.now() - time * 1000;
+        } else {
+          expectedTimeRef.current = Date.now() + time * 1000;
+        }
+      }
+
+      startForegroundService();
+
       timerRef.current = setInterval(() => {
-        setTime((prev) => {
-          if (mode === 'stopwatch') return prev + 1;
-          // Countdown for Pomodoro
-          if (prev <= 1) {
+        if (mode === 'stopwatch') {
+          const newTime = Math.floor((Date.now() - expectedTimeRef.current) / 1000);
+          setTime(newTime);
+        } else {
+          const newTime = Math.ceil((expectedTimeRef.current - Date.now()) / 1000);
+          if (newTime <= 0) {
             clearInterval(timerRef.current);
             setIsRunning(false);
-            return 0; // Completed
+            setTime(0);
+            
+            notifee.displayNotification({
+              title: '🍅 Pomodoro hoàn thành!',
+              body: 'Đã hết 25 phút, bạn làm tốt lắm!',
+              android: {
+                channelId: 'timer',
+                importance: AndroidImportance.HIGH,
+              }
+            });
+          } else {
+            setTime(newTime);
           }
-          return prev - 1;
-        });
+        }
       }, 1000);
       
       Animated.loop(
@@ -41,14 +124,22 @@ export default function StopwatchScreen({ navigation }) {
       clearInterval(timerRef.current);
       pulseAnim.stopAnimation();
       pulseAnim.setValue(1);
+      
+      stopForegroundService();
     }
     return () => clearInterval(timerRef.current);
   }, [isRunning, mode]);
 
-  const toggleTimer = () => setIsRunning(!isRunning);
+  const toggleTimer = () => {
+    if (isRunning) {
+      expectedTimeRef.current = null;
+    }
+    setIsRunning(!isRunning);
+  };
 
   const resetTimer = () => {
     setIsRunning(false);
+    expectedTimeRef.current = null;
     if (mode === 'pomodoro') setTime(25 * 60);
     else if (mode === 'shortBreak') setTime(5 * 60);
     else setTime(0);
@@ -59,7 +150,14 @@ export default function StopwatchScreen({ navigation }) {
       Alert.alert('Thiếu chủ đề', 'Vui lòng nhập chủ đề bạn đang học.');
       return;
     }
-    const totalSeconds = savedTime + time;
+    
+    let totalSeconds;
+    if (mode === 'pomodoro') {
+      totalSeconds = savedTime + (25 * 60 - time);
+    } else {
+      totalSeconds = savedTime + time;
+    }
+
     const minutes = Math.round(totalSeconds / 60);
     if (minutes < 1) {
       Alert.alert('Thời gian quá ngắn', 'Hãy học ít nhất 1 phút trước khi lưu.');
@@ -70,7 +168,9 @@ export default function StopwatchScreen({ navigation }) {
       await createStudySession({ topic: topic.trim(), duration: minutes });
       Alert.alert('Đã lưu!', `Đã ghi nhận ${minutes} phút học chủ đề "${topic.trim()}".`);
       setSavedTime(0);
-      setTime(0);
+      expectedTimeRef.current = null;
+      if (mode === 'pomodoro') setTime(25 * 60);
+      else setTime(0);
       setIsRunning(false);
     } catch (err) {
       Alert.alert('Lỗi', 'Không thể lưu buổi học. Vui lòng thử lại.');
@@ -81,6 +181,7 @@ export default function StopwatchScreen({ navigation }) {
 
   const changeMode = (newMode) => {
     setIsRunning(false);
+    expectedTimeRef.current = null;
     setMode(newMode);
     if (newMode === 'pomodoro') setTime(25 * 60);
     else if (newMode === 'shortBreak') setTime(5 * 60);
@@ -93,7 +194,7 @@ export default function StopwatchScreen({ navigation }) {
     return `${m}:${s}`;
   };
 
-  const canSave = (savedTime + time) >= 60 && !isRunning;
+  const canSave = !isRunning && (mode === 'pomodoro' ? (time < 10 * 60) : ((savedTime + time) >= 60));
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

@@ -48,6 +48,17 @@ export default function EditProfileScreen({ navigation }) {
     }
   };
 
+  const handleDateChange = (text) => {
+    const cleaned = text.replace(/[^0-9]/g, '');
+    let formatted = cleaned;
+    if (cleaned.length > 2 && cleaned.length <= 4) {
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    } else if (cleaned.length > 4) {
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+    }
+    setDateOfBirth(formatted);
+  };
+
   const parseDateVN = (str) => {
     const parts = str.split('/');
     if (parts.length !== 3) return null;
@@ -153,10 +164,11 @@ export default function EditProfileScreen({ navigation }) {
                 <TextInput
                   style={[styles.input, { color: theme.text }]}
                   value={dateOfBirth}
-                  onChangeText={setDateOfBirth}
+                  onChangeText={handleDateChange}
                   placeholder="dd/mm/yyyy"
                   placeholderTextColor={theme.textMuted}
                   keyboardType="numeric"
+                  maxLength={10}
                 />
               </View>
             </View>
